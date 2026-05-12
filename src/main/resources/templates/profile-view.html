@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Hồ Sơ Cá Nhân - Smart Healthcare</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+    .profile-card { border: none; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+  </style>
+</head>
+<body class="py-5">
+<div class="container" style="max-width: 800px;">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-primary"><i class="fa-solid fa-id-card me-2"></i>Hồ Sơ Cá Nhân</h2>
+    <div>
+      <a th:href="@{/}" class="btn btn-primary shadow-sm me-2 fw-bold">
+        <i class="fa-solid fa-house me-1"></i>Trang chủ
+      </a>
+      <a th:href="@{/logout}" class="btn btn-outline-danger shadow-sm fw-bold">
+        <i class="fa-solid fa-right-from-bracket me-1"></i>Đăng xuất
+      </a>
+    </div>
+  </div>
+
+  <div th:if="${successMessage}" class="alert alert-success shadow-sm rounded-3">
+    <i class="fa-solid fa-check-circle me-2"></i><span th:text="${successMessage}">Cập nhật thành công!</span>
+  </div>
+
+  <div class="card profile-card p-4 bg-white">
+    <form th:action="@{/profile}" method="post">
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label text-muted">Tài khoản</label>
+          <input type="text" class="form-control bg-light" th:value="${session.loggedInUser.username}" readonly>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label text-muted">Quyền hạn</label>
+          <input type="text" class="form-control bg-light" th:value="${session.loggedInUser.role}" readonly>
+        </div>
+      </div>
+
+      <hr class="text-muted opacity-25">
+
+      <div class="row mt-2">
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-bold">Họ và tên <span class="text-danger">*</span></label>
+          <input type="text" name="fullName" class="form-control" th:value="${session.loggedInUser.profile.fullName}" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-bold">Giới tính</label>
+          <select name="gender" class="form-select">
+            <option value="Nam" th:selected="${session.loggedInUser.profile.gender == 'Nam'}">Nam</option>
+            <option value="Nữ" th:selected="${session.loggedInUser.profile.gender == 'Nữ'}">Nữ</option>
+            <option value="Khác" th:selected="${session.loggedInUser.profile.gender == 'Khác'}">Khác</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-bold">Số điện thoại</label>
+          <input type="text" name="phone" class="form-control" th:value="${session.loggedInUser.profile.phone}">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-bold">Email</label>
+          <input type="email" name="email" class="form-control" th:value="${session.loggedInUser.profile.email}">
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-bold">Địa chỉ</label>
+        <input type="text" name="address" class="form-control" th:value="${session.loggedInUser.profile.address}">
+      </div>
+
+      <div class="mb-4" style="max-width: 50%;">
+        <label class="form-label fw-bold">Ngày sinh</label>
+        <input type="date" name="dateOfBirth" class="form-control" th:value="${session.loggedInUser.profile.dateOfBirth}">
+      </div>
+
+      <hr class="text-muted opacity-25">
+
+      <div class="text-end">
+        <button type="submit" class="btn btn-primary px-4 py-2 fw-bold shadow-sm">
+          <i class="fa-solid fa-floppy-disk me-1"></i>Cập nhật thông tin
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+</body>
+</html>

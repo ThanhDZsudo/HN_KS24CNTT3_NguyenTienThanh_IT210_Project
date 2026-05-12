@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Sổ Khám Bệnh - Smart Healthcare</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        .portal-header { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: white; padding: 40px 0; border-radius: 0 0 25px 25px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .table-container { background: white; border-radius: 20px; padding: 0; box-shadow: 0 5px 20px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e9ecef; }
+        .table th { border-bottom: 2px solid #dee2e6; color: #495057; font-weight: bold; padding: 18px; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px;}
+        .table td { padding: 18px; vertical-align: middle; border-bottom: 1px solid #f1f3f5; }
+        .badge-pending { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .badge-completed { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .btn-book { border-radius: 25px; padding: 10px 25px; font-weight: bold; transition: all 0.3s; }
+        .btn-book:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(25, 135, 84, 0.4); }
+    </style>
+</head>
+<body>
+<div class="portal-header text-center position-relative">
+    <a th:href="@{/}" class="btn btn-outline-light btn-sm position-absolute top-0 end-0 m-4 rounded-pill px-3">
+        <i class="fa-solid fa-house me-1"></i>Trang chủ
+    </a>
+    <h2 class="fw-bold mb-2"><i class="fa-solid fa-book-medical me-2 text-info"></i>Sổ Khám Bệnh Điện Tử</h2>
+    <p class="mb-0 opacity-75">Theo dõi hồ sơ sức khỏe và các lịch hẹn y tế của bạn</p>
+</div>
+
+<div class="container mb-5">
+    <div th:if="${param.success}" class="alert alert-success shadow-sm rounded-4 border-0">
+        <i class="fa-solid fa-calendar-check me-2"></i>Đặt lịch thành công!
+    </div>
+    <div th:if="${param.cancel_success}" class="alert alert-success shadow-sm rounded-4 border-0">
+        <i class="fa-solid fa-ban me-2"></i>Đã hủy lịch khám thành công!
+    </div>
+    <div th:if="${param.cancel_error}" class="alert alert-danger shadow-sm rounded-4 border-0" th:text="${param.cancel_error}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+        <h4 class="fw-bold text-dark mb-0"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Lịch sử & Lịch hẹn</h4>
+        <a th:href="@{/patient/book-appointment}" class="btn btn-success btn-book">
+            <i class="fa-solid fa-plus me-1"></i> Đặt Lịch Mới Ngay
+        </a>
+    </div>
+
+    <div class="table-container">
+        <table class="table table-hover mb-0">
+            <thead class="bg-light">
+            <tr>
+                <th width="20%">Thời gian</th>
+                <th width="35%">Bác sĩ phụ trách</th>
+                <th width="20%">Chuyên khoa</th>
+                <th width="25%" class="text-center">Trạng thái / Thao tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="a : ${appointments}">
+                <td>
+                    <div class="fw-bold text-dark fs-5" th:text="${a.appointmentDate}"></div>
+                    <div class="text-danger fw-bold"><i class="fa-regular fa-clock me-1"></i><span th:text="${a.appointmentTime}"></span></div>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                            <i class="fa-solid fa-user-doctor fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="fw-bold text-dark d-block fs-6" th:text="${'BS. ' + a.doctor.profile.fullName}"></span>
+                            <small class="text-muted"><i class="fa-solid fa-hospital me-1"></i>Smart Healthcare</small>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary border px-3 py-2 rounded-pill shadow-sm">
+                                <i class="fa-solid fa-stethoscope me-1"></i><span th:text="${a.specialty.name}"></span>
+                            </span>
+                </td>
+                <td class="text-center">
+                    <span th:if="${a.status == 'PENDING'}" class="badge badge-pending px-3 py-2 rounded-pill fw-bold shadow-sm">Chờ khám</span>
+                    <span th:if="${a.status == 'COMPLETED'}" class="badge badge-completed px-3 py-2 rounded-pill fw-bold shadow-sm">Đã khám</span>
+                    <span th:if="${a.status == 'CANCELLED'}" class="badge bg-danger px-3 py-2 rounded-pill fw-bold shadow-sm">Đã hủy</span>
+
+                    <div class="mt-2" th:if="${a.status == 'PENDING'}">
+                        <a th:href="@{/patient/cancel-appointment/{id}(id=${a.id})}"
+                           class="btn btn-sm btn-outline-danger rounded-pill px-3 mt-1"
+                           onclick="return confirm('Bạn có chắc chắn muốn hủy lịch này? (Chỉ áp dụng trước 24h)')">
+                            <i class="fa-solid fa-ban me-1"></i>Hủy lịch
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(appointments)}">
+                <td colspan="4" class="text-center py-5">
+                    <div class="text-muted opacity-50 mb-3"><i class="fa-solid fa-folder-open" style="font-size: 60px;"></i></div>
+                    <h5 class="text-muted fw-bold">Bạn chưa có hồ sơ khám bệnh nào</h5>
+                    <a th:href="@{/patient/book-appointment}" class="btn btn-primary rounded-pill px-4 py-2 mt-2 fw-bold shadow-sm">Đặt lịch ngay</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

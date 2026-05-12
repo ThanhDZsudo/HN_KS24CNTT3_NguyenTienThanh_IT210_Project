@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cấp Phát Thuốc - Smart Healthcare</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        .nav-tabs .nav-link { border-radius: 10px 10px 0 0; }
+        .nav-tabs .nav-link.active { background-color: white; border-bottom: none; }
+    </style>
+</head>
+<body class="py-4">
+<div class="container" style="max-width: 1000px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-info"><i class="fa-solid fa-prescription-bottle-medical me-2"></i>Quầy Cấp Phát Thuốc</h2>
+        <a th:href="@{/}" class="btn btn-secondary shadow-sm"><i class="fa-solid fa-arrow-left me-1"></i>Trang chủ</a>
+    </div>
+
+    <div th:if="${param.success}" class="alert alert-success shadow-sm rounded-3">
+        <i class="fa-solid fa-check-circle me-2"></i>Đã xác nhận cấp phát thuốc thành công!
+    </div>
+
+    <ul class="nav nav-tabs mb-0 border-bottom-0" id="dispenseTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold px-4 py-3" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
+                <i class="fa-solid fa-hourglass-half text-warning me-1"></i>Đang Chờ Phát
+                <span class="badge bg-danger ms-1 rounded-pill" th:text="${#lists.size(pendingRecords)}">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold px-4 py-3" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+                <i class="fa-solid fa-clock-rotate-left text-secondary me-1"></i>Lịch Sử Đã Cấp
+                <span class="badge bg-secondary ms-1 rounded-pill" th:text="${#lists.size(historyRecords)}">0</span>
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content bg-white shadow-sm rounded-bottom-4 rounded-end-4 p-4 border border-top-0" id="dispenseTabsContent">
+
+        <div class="tab-pane fade show active" id="pending" role="tabpanel">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-center">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Bệnh nhân</th>
+                        <th>Bác sĩ kê đơn</th>
+                        <th class="text-start">Chi tiết đơn thuốc</th>
+                        <th>Thời gian kê</th>
+                        <th>Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r : ${pendingRecords}">
+                        <td class="fw-bold text-dark" th:text="${r.appointment.patient.profile.fullName}"></td>
+                        <td th:text="${'BS. ' + r.appointment.doctor.profile.fullName}"></td>
+                        <td class="text-start text-primary" style="white-space: pre-wrap;" th:text="${r.prescription}"></td>
+                        <td th:text="${#temporals.format(r.createdAt, 'HH:mm - dd/MM/yyyy')}"></td>
+                        <td>
+                            <a th:href="@{/admin/prescriptions/dispense/{id}(id=${r.id})}"
+                               class="btn btn-success fw-bold rounded-pill px-4 shadow-sm"
+                               onclick="return confirm('Xác nhận đã giao đủ thuốc cho bệnh nhân này?')">
+                                <i class="fa-solid fa-check me-1"></i>Phát Thuốc
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(pendingRecords)}">
+                        <td colspan="5" class="py-5 text-muted">
+                            <i class="fa-solid fa-clipboard-check fs-1 mb-2 text-success opacity-50"></i>
+                            <h5>Mọi đơn thuốc đã được giải quyết!</h5>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="history" role="tabpanel">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-center">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Bệnh nhân</th>
+                        <th>Bác sĩ kê đơn</th>
+                        <th class="text-start">Chi tiết đơn thuốc</th>
+                        <th>Thời gian kê</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r : ${historyRecords}">
+                        <td class="fw-bold text-secondary" th:text="${r.appointment.patient.profile.fullName}"></td>
+                        <td class="text-secondary" th:text="${'BS. ' + r.appointment.doctor.profile.fullName}"></td>
+                        <td class="text-start text-muted" style="white-space: pre-wrap;" th:text="${r.prescription}"></td>
+                        <td class="text-muted" th:text="${#temporals.format(r.createdAt, 'HH:mm - dd/MM/yyyy')}"></td>
+                        <td>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2">
+                                    <i class="fa-solid fa-check-double me-1"></i>Đã cấp phát
+                                </span>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(historyRecords)}">
+                        <td colspan="5" class="py-5 text-muted">
+                            <i class="fa-solid fa-clock-rotate-left fs-1 mb-2 opacity-50"></i>
+                            <h5>Chưa có lịch sử cấp phát thuốc nào.</h5>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

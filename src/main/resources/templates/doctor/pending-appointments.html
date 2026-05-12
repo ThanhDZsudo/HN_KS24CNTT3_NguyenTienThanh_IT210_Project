@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Hàng Chờ Khám - Smart Healthcare</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        .table-custom { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .table-custom thead { background-color: #1e3c72; color: white; }
+        .table-custom th { font-weight: 600; padding: 15px; border: none; }
+        .table-custom td { padding: 15px; vertical-align: middle; border-bottom: 1px solid #f1f1f1; }
+        .btn-examine { background: #27ae60; color: white; border-radius: 20px; padding: 6px 20px; font-weight: bold; transition: all 0.3s; }
+        .btn-examine:hover { background: #219653; color: white; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3); }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-5">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/"><i class="fa-solid fa-user-doctor me-2"></i>Khu Vực Khám Bệnh</a>
+        <a th:href="@{/}" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-house me-1"></i>Về Trang chủ</a>
+    </div>
+</nav>
+
+<div class="container mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-primary mb-0"><i class="fa-solid fa-users-medical me-2"></i>Danh Sách Bệnh Nhân Chờ Khám</h3>
+        <span class="badge bg-warning text-dark fs-6 shadow-sm px-3 py-2 rounded-pill"><i class="fa-solid fa-clock me-1"></i>Hôm nay</span>
+    </div>
+
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show shadow-sm rounded-4" role="alert">
+        <i class="fa-solid fa-check-circle me-2"></i><strong>Tuyệt vời!</strong> Đã lưu hồ sơ bệnh án thành công.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="table-custom">
+        <table class="table table-hover mb-0 text-center">
+            <thead>
+            <tr>
+                <th>Giờ hẹn</th>
+                <th>Ngày hẹn</th>
+                <th class="text-start ps-4">Thông tin Bệnh Nhân</th>
+                <th>Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="a : ${appointments}">
+                <td><span class="badge bg-danger fs-6 rounded-pill px-3 py-2 shadow-sm" th:text="${a.appointmentTime}"></span></td>
+                <td class="fw-bold text-secondary" th:text="${a.appointmentDate}"></td>
+                <td class="text-start ps-4 fw-bold fs-5 text-dark">
+                    <i class="fa-solid fa-user-injured text-primary me-2"></i><span th:text="${a.patient.profile.fullName}"></span>
+                </td>
+                <td>
+                    <a th:href="@{/doctor/examine/{id}(id=${a.id})}" class="btn btn-examine text-decoration-none">
+                        <i class="fa-solid fa-stethoscope me-1"></i>Khám Ngay
+                    </a>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(appointments)}">
+                <td colspan="4" class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-mug-hot fs-1 mb-3 text-secondary opacity-50"></i>
+                    <h5>Hiện tại không có bệnh nhân nào đang chờ.</h5>
+                    <p class="mb-0">Bác sĩ có thể nghỉ ngơi hoặc xem lại lịch sử khám!</p>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

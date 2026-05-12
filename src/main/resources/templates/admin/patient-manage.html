@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Quản Lý Bệnh Nhân - Smart Healthcare</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f7f6; }
+        .table-card { border: none; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body class="py-4">
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-success"><i class="fa-solid fa-hospital-user me-2"></i>Hồ Sơ Bệnh Nhân</h3>
+        <a th:href="@{/admin/dashboard}" class="btn btn-secondary rounded-pill px-4">Quay lại</a>
+    </div>
+
+    <div class="card table-card p-4 bg-white">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>Họ và Tên</th>
+                <th>Giới Tính</th>
+                <th>Ngày Sinh</th>
+                <th>Số Điện Thoại</th>
+                <th>Địa Chỉ</th>
+                <th>Hành Động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="patient : ${patientPage.content}">
+                <td class="fw-bold" th:text="${patient.profile != null ? patient.profile.fullName : 'Chưa cập nhật'}"></td>
+                <td th:text="${patient.profile != null ? patient.profile.gender : ''}"></td>
+                <td th:text="${patient.profile != null ? patient.profile.dateOfBirth : ''}"></td>
+                <td th:text="${patient.profile != null ? patient.profile.phone : ''}"></td>
+                <td th:text="${patient.profile != null ? patient.profile.address : ''}"></td>
+                <td>
+                    <a th:href="@{/admin/patients/{id}(id=${patient.id})}" class="btn btn-sm btn-success">
+                        <i class="fa-solid fa-eye me-1"></i> Chi tiết
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <nav th:if="${patientPage.totalPages > 1}" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${patientPage.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/patients(page=${patientPage.number - 1})}">Trước</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, patientPage.totalPages - 1)}"
+                    th:classappend="${i == patientPage.number} ? 'active'">
+                    <a class="page-link" th:href="@{/admin/patients(page=${i})}" th:text="${i + 1}"></a>
+                </li>
+                <li class="page-item" th:classappend="${patientPage.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/patients(page=${patientPage.number + 1})}">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+</body>
+</html>

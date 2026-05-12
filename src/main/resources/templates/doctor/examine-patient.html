@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Phòng Khám - Smart Healthcare</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .form-control.is-invalid { background-image: none !important; }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-primary"><i class="fa-solid fa-stethoscope me-2"></i>Tiến Hành Khám Bệnh</h3>
+        <a th:href="@{/doctor/pending-appointments}" class="btn btn-secondary"><i class="fa-solid fa-arrow-left me-1"></i>Hủy & Quay Lại</a>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-primary text-white p-3 rounded-top-4">
+            <h5 class="mb-0">Bệnh Nhân: <span th:text="${appointment.patient.profile.fullName}"></span></h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="row mb-4 text-muted border-bottom pb-3">
+                <div class="col-md-4"><strong><i class="fa-solid fa-calendar me-1"></i>Ngày sinh:</strong> <span th:text="${appointment.patient.profile.dateOfBirth}"></span></div>
+                <div class="col-md-4"><strong><i class="fa-solid fa-venus-mars me-1"></i>Giới tính:</strong> <span th:text="${appointment.patient.profile.gender}"></span></div>
+                <div class="col-md-4"><strong><i class="fa-solid fa-clock me-1"></i>Lịch hẹn:</strong> <span th:text="${appointment.appointmentDate + ' ' + appointment.appointmentTime}"></span></div>
+            </div>
+
+            <form th:action="@{/doctor/examine/{id}(id=${appointment.id})}" method="post" th:object="${dto}" novalidate>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Triệu chứng lâm sàng</label>
+                        <textarea name="symptoms" class="form-control" th:classappend="${errorSymptoms} ? 'is-invalid' : ''" rows="3" placeholder="Nhập triệu chứng bệnh nhân đang gặp phải..."></textarea>
+                        <div class="text-danger small mt-1" th:if="${errorSymptoms}" th:text="${errorSymptoms}"></div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold text-danger">Chẩn đoán bệnh</label>
+                        <textarea name="diagnosis" class="form-control" th:classappend="${errorDiagnosis} ? 'is-invalid' : ''" rows="3" placeholder="Nhập kết luận bệnh..."></textarea>
+                        <div class="text-danger small mt-1" th:if="${errorDiagnosis}" th:text="${errorDiagnosis}"></div>
+                    </div>
+                </div>
+
+                <div class="mb-4 bg-light p-3 rounded-3 border">
+                    <label class="form-label fw-bold text-success"><i class="fa-solid fa-pills me-2"></i>Kê Đơn Thuốc</label>
+                    <div class="input-group mb-3">
+                        <select id="medicineSelect" class="form-select">
+                            <option value="">-- Chọn thuốc từ kho --</option>
+                            <option th:each="m : ${medicines}" th:value="${m.name}" th:text="${m.name + ' (' + m.unit + ')'}"></option>
+                        </select>
+                        <input type="text" id="dosageInput" class="form-control" placeholder="Liều dùng (VD: 2 viên/ngày sáng tối)">
+                        <button type="button" class="btn btn-success px-4" onclick="addMedicine()"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+
+                    <table class="table table-sm table-bordered bg-white">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Tên thuốc</th><th>Liều dùng</th><th width="100" class="text-center">Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody id="prescriptionBody"></tbody>
+                    </table>
+                    <textarea name="prescription" id="finalPrescription" class="d-none"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm"><i class="fa-solid fa-floppy-disk me-2"></i>Lưu Bệnh Án & Hoàn Thành</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let medicineList = [];
+    function addMedicine() {
+        const name = document.getElementById('medicineSelect').value;
+        const dosage = document.getElementById('dosageInput').value;
+        if (!name || !dosage) { alert("Vui lòng chọn thuốc và nhập liều dùng!"); return; }
+        medicineList.push({ name, dosage });
+        document.getElementById('medicineSelect').value = '';
+        document.getElementById('dosageInput').value = '';
+        renderTable();
+    }
+    function removeMedicine(index) {
+        medicineList.splice(index, 1);
+        renderTable();
+    }
+    function editMedicine(index) {
+        const item = medicineList[index];
+        document.getElementById('medicineSelect').value = item.name;
+        document.getElementById('dosageInput').value = item.dosage;
+        removeMedicine(index);
+    }
+    function renderTable() {
+        const body = document.getElementById('prescriptionBody');
+        body.innerHTML = '';
+        let textResult = '';
+        medicineList.forEach((item, index) => {
+            body.innerHTML += `
+                <tr>
+                    <td class="fw-bold">${item.name}</td><td>${item.dosage}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-info text-white me-1" onclick="editMedicine(${index})"><i class="fa-solid fa-edit"></i></button>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeMedicine(${index})"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            textResult += `- ${item.name}: ${item.dosage}\n`;
+        });
+        document.getElementById('finalPrescription').value = textResult;
+    }
+</script>
+</body>
+</html>
