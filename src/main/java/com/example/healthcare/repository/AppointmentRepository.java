@@ -33,8 +33,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @Query(value = "SELECT MONTH(a.appointment_date) as month, SUM(s.price) as total " +
             "FROM appointments a " +
             "JOIN specialties s ON a.specialty_id = s.id " +
-            "WHERE a.status = 'COMPLETED' " +
+            "WHERE a.status <> 'CANCELLED' " +
             "GROUP BY MONTH(a.appointment_date) " +
-            "ORDER BY month ASC", nativeQuery = true)
+            "ORDER BY MONTH(a.appointment_date) ASC",
+            nativeQuery = true)
     List<RevenueDTO> getMonthlyRevenue();
 }

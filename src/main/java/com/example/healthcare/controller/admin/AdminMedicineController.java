@@ -17,7 +17,6 @@ public class AdminMedicineController {
 
     private final MedicineRepository medicineRepo;
 
-    // 1. HIỂN THỊ DANH SÁCH THUỐC (CÓ PHÂN TRANG 5 BẢN GHI/TRANG)
     @GetMapping
     public String manageMedicines(@RequestParam(defaultValue = "0") int page, Model model) {
         Page<Medicine> medicinePage = medicineRepo.findAll(PageRequest.of(page, 5));
@@ -26,7 +25,6 @@ public class AdminMedicineController {
         return "admin/medicine-manage";
     }
 
-    // 2. LƯU HOẶC CẬP NHẬT THUỐC
     @PostMapping("/save")
     public String saveMedicine(@ModelAttribute("dto") MedicineDTO dto, Model model) {
         boolean hasError = false;
@@ -39,28 +37,28 @@ public class AdminMedicineController {
             model.addAttribute("errorUnit", "Vui lòng nhập đơn vị!");
             hasError = true;
         }
+        if (dto.getQuantity() == null || dto.getQuantity() < 0) {
+            model.addAttribute("errorQuantity", "Số lượng không hợp lệ!");
+            hasError = true;
+        }
 
-        // NẾU CÓ LỖI NHẬP LIỆU -> Vẫn phải load lại trang 1 để bảng không bị trắng
         if (hasError) {
             model.addAttribute("medicinePage", medicineRepo.findAll(PageRequest.of(0, 5)));
             return "admin/medicine-manage";
         }
 
-        Medicine medicine;
-        if (dto.getId() != null) {
-            medicine = medicineRepo.findById(dto.getId()).orElse(new Medicine());
-        } else {
-            medicine = new Medicine();
-        }
+        Medicine medicine = (dto.getId() != null) ? medicineRepo.findById(dto.getId()).orElse(new Medicine()) : new Medicine();
+
         medicine.setName(dto.getName());
         medicine.setUnit(dto.getUnit());
         medicine.setDescription(dto.getDescription());
+        // THÊM DÒNG NÀY ĐỂ LƯU SỐ LƯỢNG
+        medicine.setQuantity(dto.getQuantity());
 
         medicineRepo.save(medicine);
         return "redirect:/admin/medicines?success";
     }
 
-    // 3. XÓA THUỐC
     @GetMapping("/delete/{id}")
     public String deleteMedicine(@PathVariable Long id) {
         medicineRepo.deleteById(id);

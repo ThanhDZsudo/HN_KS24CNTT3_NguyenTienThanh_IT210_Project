@@ -40,8 +40,14 @@ public class AdminController {
         model.addAttribute("totalAppointments", appointmentRepo.count());
 
         List<RevenueDTO> revenueData = appointmentRepo.getMonthlyRevenue();
-        Double totalRevenue = revenueData.stream().mapToDouble(RevenueDTO::getTotal).sum();
-        model.addAttribute("totalRevenue", totalRevenue != null ? totalRevenue : 0.0);
+
+        // FIX LỖI Ở ĐÂY: Thêm .filter(r -> r.getTotal() != null) để lọc bỏ các khoản doanh thu bị NULL
+        Double totalRevenue = revenueData.stream()
+                .filter(r -> r.getTotal() != null)
+                .mapToDouble(RevenueDTO::getTotal)
+                .sum();
+
+        model.addAttribute("totalRevenue", totalRevenue);
         model.addAttribute("revenueData", revenueData);
 
         model.addAttribute("topDoctors", appointmentRepo.getTopDoctors(PageRequest.of(0, 5)));
@@ -49,7 +55,7 @@ public class AdminController {
         return "admin/admin-statistics";
     }
 
-    // --- QUẢN LÝ BÁC SĨ (CÓ PHÂN TRANG - 5 BẢN GHI/TRANG) ---
+    // --- QUẢN LÝ BÁC SĨ ---
     @GetMapping("/doctors")
     public String listDoctors(@RequestParam(defaultValue = "0") int page, Model model) {
         model.addAttribute("doctorPage", userRepo.findByRole(Role.DOCTOR, PageRequest.of(page, 5)));
@@ -94,7 +100,7 @@ public class AdminController {
         return "redirect:/admin/doctors";
     }
 
-    // --- QUẢN LÝ BỆNH NHÂN (CÓ PHÂN TRANG - 5 BẢN GHI/TRANG) ---
+    // --- QUẢN LÝ BỆNH NHÂN ---
     @GetMapping("/patients")
     public String listPatients(@RequestParam(defaultValue = "0") int page, Model model) {
         model.addAttribute("patientPage", userRepo.findByRole(Role.PATIENT, PageRequest.of(page, 5)));
@@ -109,6 +115,7 @@ public class AdminController {
         return "admin/patient-details";
     }
 
+    // --- QUẢN LÝ PHÁT THUỐC ---
     @GetMapping("/prescriptions")
     public String listPrescriptions(Model model) {
         model.addAttribute("pendingRecords", examService.getPendingPrescriptions());

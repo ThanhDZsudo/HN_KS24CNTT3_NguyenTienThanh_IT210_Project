@@ -8,4 +8,5 @@ public class MedicineDTO {
     private String name;
     private String unit;
     private String description;
+    private Integer quantity;
 }

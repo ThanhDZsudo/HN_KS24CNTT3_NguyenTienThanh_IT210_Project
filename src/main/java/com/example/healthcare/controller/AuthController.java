@@ -112,7 +112,7 @@ public class AuthController {
             } else if (user.getRole() == Role.DOCTOR) {
                 return "redirect:/doctor/pending-appointments"; // Bác sĩ về Hàng chờ
             } else {
-                return "redirect:/patient/medical-history"; // Bệnh nhân về Lịch sử khám
+                return "redirect:patient/dashboard"; // Bệnh nhân về Lịch sử khám
             }
         }
 

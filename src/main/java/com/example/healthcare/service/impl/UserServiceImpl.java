@@ -23,7 +23,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User register(UserRegisterDTO dto) throws Exception {
-        if (userRepository.findByUsername(dto.getUsername()) != null) {
+        // LỖI Ở ĐÂY 1: Đã đổi != null thành .isPresent()
+        if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
             throw new Exception("Tên đăng nhập đã tồn tại!");
         }
         User user = new User();
@@ -64,7 +65,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User createDoctor(DoctorCreateDTO dto) throws Exception {
-        if (userRepository.findByUsername(dto.getUsername()) != null) {
+        // LỖI Ở ĐÂY 2: Đã đổi != null thành .isPresent()
+        if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
             throw new Exception("Tên đăng nhập đã tồn tại!");
         }
 

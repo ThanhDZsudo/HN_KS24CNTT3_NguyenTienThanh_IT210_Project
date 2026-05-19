@@ -14,4 +14,5 @@ public class Medicine {
     private String name;
     private String unit;
     private String description;
+    private Integer quantity;
 }

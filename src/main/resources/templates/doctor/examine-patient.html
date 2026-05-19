@@ -42,23 +42,39 @@
 
                 <div class="mb-4 bg-light p-3 rounded-3 border">
                     <label class="form-label fw-bold text-success"><i class="fa-solid fa-pills me-2"></i>Kê Đơn Thuốc</label>
-                    <div class="input-group mb-3">
-                        <select id="medicineSelect" class="form-select">
-                            <option value="">-- Chọn thuốc từ kho --</option>
-                            <option th:each="m : ${medicines}" th:value="${m.name}" th:text="${m.name + ' (' + m.unit + ')'}"></option>
+                    <div class="input-group mb-2">
+                        <select id="medicineSelect" class="form-select border-success">
+                            <option value="" data-stock="0">-- Chọn thuốc từ kho --</option>
+                            <option th:each="m : ${medicines}"
+                                    th:value="${m.name}"
+                                    th:data-stock="${m.quantity}"
+                                    th:text="${m.name + ' (' + m.unit + ') - Kho: ' + m.quantity}">
+                            </option>
                         </select>
-                        <input type="text" id="dosageInput" class="form-control" placeholder="Liều dùng (VD: 2 viên/ngày sáng tối)">
-                        <button type="button" class="btn btn-success px-4" onclick="addMedicine()"><i class="fa-solid fa-plus"></i></button>
+
+                        <input type="number" id="quantityInput" class="form-control border-success text-center" placeholder="SL" style="max-width: 90px;">
+
+                        <input type="text" id="dosageInput" class="form-control border-success" placeholder="Liều dùng (VD: 2 viên/ngày sáng tối)">
+
+                        <button type="button" class="btn btn-success px-4 fw-bold" onclick="addMedicine()"><i class="fa-solid fa-plus"></i></button>
                     </div>
 
-                    <table class="table table-sm table-bordered bg-white">
+                    <div id="medicineError" class="text-danger small fw-bold mb-3 d-none"></div>
+
+                    <table class="table table-sm table-bordered bg-white align-middle">
                         <thead class="table-light">
                         <tr>
-                            <th>Tên thuốc</th><th>Liều dùng</th><th width="100" class="text-center">Hành động</th>
+                            <th>Tên thuốc</th>
+                            <th width="80" class="text-center">SL</th>
+                            <th>Liều dùng</th>
+                            <th width="100" class="text-center">Hành động</th>
                         </tr>
                         </thead>
-                        <tbody id="prescriptionBody"></tbody>
+                        <tbody id="prescriptionBody">
+                        <tr><td colspan="4" class="text-center text-muted fst-italic">Chưa kê thuốc nào...</td></tr>
+                        </tbody>
                     </table>
+
                     <textarea name="prescription" id="finalPrescription" class="d-none"></textarea>
                 </div>
 
@@ -70,40 +86,109 @@
 
 <script>
     let medicineList = [];
+
     function addMedicine() {
-        const name = document.getElementById('medicineSelect').value;
+        const select = document.getElementById('medicineSelect');
+        const quantityInput = document.getElementById('quantityInput').value;
         const dosage = document.getElementById('dosageInput').value;
-        if (!name || !dosage) { alert("Vui lòng chọn thuốc và nhập liều dùng!"); return; }
-        medicineList.push({ name, dosage });
+        const errorDiv = document.getElementById('medicineError');
+
+        // Đầu tiên luôn ẩn lỗi đi nếu người dùng đang bấm lại
+        errorDiv.classList.add('d-none');
+        errorDiv.innerText = "";
+
+        if (select.value === "" || quantityInput === "" || dosage.trim() === "") {
+            errorDiv.innerText = "⚠️ Vui lòng chọn thuốc, nhập số lượng và liều dùng!";
+            errorDiv.classList.remove('d-none');
+            return;
+        }
+
+        const name = select.value;
+        const requestedQuantity = parseInt(quantityInput);
+
+        if (requestedQuantity <= 0) {
+            errorDiv.innerText = "⚠️ Số lượng kê đơn phải lớn hơn 0!";
+            errorDiv.classList.remove('d-none');
+            return;
+        }
+
+        const selectedOption = select.options[select.selectedIndex];
+        const stockAvailable = parseInt(selectedOption.getAttribute('data-stock'));
+
+        let alreadyAdded = 0;
+        let existingIndex = -1;
+
+        for(let i = 0; i < medicineList.length; i++) {
+            if(medicineList[i].name === name) {
+                alreadyAdded += parseInt(medicineList[i].quantity);
+                existingIndex = i;
+            }
+        }
+
+        // KIỂM TRA TỒN KHO VÀ HIỂN THỊ TEXT ĐỎ
+        if ((requestedQuantity + alreadyAdded) > stockAvailable) {
+            errorDiv.innerText = `❌ Không đủ thuốc! Trong kho chỉ còn ${stockAvailable} đơn vị (trong đơn hiện tại bạn đã kê ${alreadyAdded} đơn vị loại này rồi).`;
+            errorDiv.classList.remove('d-none');
+            return;
+        }
+
+        if (existingIndex !== -1) {
+            medicineList[existingIndex].quantity = parseInt(medicineList[existingIndex].quantity) + requestedQuantity;
+            medicineList[existingIndex].dosage = dosage;
+        } else {
+            medicineList.push({ name: name, quantity: requestedQuantity, dosage: dosage });
+        }
+
         document.getElementById('medicineSelect').value = '';
+        document.getElementById('quantityInput').value = '';
         document.getElementById('dosageInput').value = '';
+
         renderTable();
     }
+
     function removeMedicine(index) {
         medicineList.splice(index, 1);
         renderTable();
     }
+
     function editMedicine(index) {
         const item = medicineList[index];
         document.getElementById('medicineSelect').value = item.name;
+        document.getElementById('quantityInput').value = item.quantity;
         document.getElementById('dosageInput').value = item.dosage;
+
+        // Ẩn lỗi đi khi bấm sửa
+        document.getElementById('medicineError').classList.add('d-none');
+
         removeMedicine(index);
     }
+
     function renderTable() {
         const body = document.getElementById('prescriptionBody');
         body.innerHTML = '';
         let textResult = '';
+
+        if (medicineList.length === 0) {
+            body.innerHTML = `<tr><td colspan="4" class="text-center text-muted fst-italic">Chưa kê thuốc nào...</td></tr>`;
+            document.getElementById('finalPrescription').value = "";
+            return;
+        }
+
         medicineList.forEach((item, index) => {
             body.innerHTML += `
                 <tr>
-                    <td class="fw-bold">${item.name}</td><td>${item.dosage}</td>
+                    <td class="fw-bold text-primary">${item.name}</td>
+                    <td class="text-center fw-bold text-danger">${item.quantity}</td>
+                    <td>${item.dosage}</td>
                     <td class="text-center">
                         <button type="button" class="btn btn-sm btn-info text-white me-1" onclick="editMedicine(${index})"><i class="fa-solid fa-edit"></i></button>
                         <button type="button" class="btn btn-sm btn-danger" onclick="removeMedicine(${index})"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>`;
-            textResult += `- ${item.name}: ${item.dosage}\n`;
+
+            textResult += `- ${item.name} (SL: ${item.quantity}) | HD: ${item.dosage}\n`;
         });
+
         document.getElementById('finalPrescription').value = textResult;
     }
 </script>
