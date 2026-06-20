@@ -1,78 +1,88 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Cấp Tài Khoản Bác Sĩ</title>
+    <title>Cấp Tài Khoản - Smart Healthcare</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .form-control.is-invalid, .form-select.is-invalid {
-            background-image: none !important;
-            padding-right: 0.75rem !important;
+        body {
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
+            min-height: 100vh; color: white; display: flex; align-items: center;
+            font-family: 'Segoe UI', sans-serif;
         }
+        .glass-card {
+            background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px;
+            padding: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            width: 100%; max-width: 700px; margin: auto;
+        }
+        .form-control, .form-select {
+            background: rgba(255,255,255,0.05) !important;
+            border: 1px solid rgba(255,255,255,0.15) !important;
+            color: white !important; border-radius: 12px; padding: 12px;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #2ed573 !important;
+            box-shadow: 0 0 15px rgba(46, 213, 115, 0.2) !important;
+        }
+        .btn-submit {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            border: none; color: white; font-weight: bold; border-radius: 12px;
+            padding: 14px; transition: 0.3s;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(56, 239, 125, 0.4); }
+        option { background-color: #162a35; color: white; }
     </style>
 </head>
-<body class="bg-light py-5">
-<div class="container card p-4 shadow-sm mx-auto" style="max-width: 600px;">
-    <h3 class="text-center mb-4 text-primary">Tạo Tài Khoản Bác Sĩ</h3>
+<body>
+<div class="container">
+    <div class="glass-card">
+        <h3 class="fw-bold text-center mb-4"><i class="fa-solid fa-user-plus text-success me-2"></i>Cấp Tài Khoản Bác Sĩ Mới</h3>
 
-    <form th:action="@{/admin/doctor/create}" method="post" th:object="${dto}">
-        <div class="mb-3">
-            <label class="form-label fw-bold">Họ và tên Bác sĩ</label>
-            <input type="text" name="fullName" class="form-control" th:value="*{fullName}" th:classappend="${nameError} ? 'is-invalid' : ''">
-            <div class="text-danger small mt-1" th:if="${nameError}" th:text="${nameError}"></div>
-        </div>
+        <form th:action="@{/admin/doctor/create}" method="post" th:object="${dto}" novalidate>
 
-        <div class="mb-3">
-            <label class="form-label d-block fw-bold">Giới tính</label>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="gender" id="male" value="Nam" th:checked="*{gender == 'Nam'}">
-                <label class="form-check-label" for="male">Nam</label>
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label class="small opacity-75 mb-2 fw-bold">Họ và Tên</label>
+                    <input type="text" th:field="*{fullName}" class="form-control" placeholder="Nhập tên bác sĩ...">
+                    <div th:if="${nameError}" class="text-warning small mt-1 fw-bold" th:text="${nameError}"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="small opacity-75 mb-2 fw-bold">Giới tính</label>
+                    <select th:field="*{gender}" class="form-select">
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="gender" id="female" value="Nữ" th:checked="*{gender == 'Nữ'}">
-                <label class="form-check-label" for="female">Nữ</label>
+
+            <div class="mb-3">
+                <label class="small opacity-75 mb-2 fw-bold">Chuyên Khoa Phụ Trách</label>
+                <select th:field="*{specialtyId}" class="form-select">
+                    <option value="">-- Chọn chuyên khoa --</option>
+                    <option th:each="s : ${specialties}" th:value="${s.id}" th:text="${s.name}"></option>
+                </select>
+                <div th:if="${specialtyError}" class="text-warning small mt-1 fw-bold" th:text="${specialtyError}"></div>
             </div>
-            <div class="text-danger small mt-1" th:if="${genderError}" th:text="${genderError}"></div>
-        </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-bold">Chuyên khoa phụ trách</label>
-            <select name="specialtyId" class="form-select" th:classappend="${specialtyError} ? 'is-invalid' : ''">
-                <option value="">-- Chọn chuyên khoa --</option>
-                <option th:each="s : ${specialties}" th:value="${s.id}" th:text="${s.name}" th:selected="${dto.specialtyId != null and dto.specialtyId == s.id}"></option>
-            </select>
-            <div class="text-danger small mt-1" th:if="${specialtyError}" th:text="${specialtyError}"></div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label fw-bold">Email</label>
-                <input type="text" name="email" class="form-control" th:value="*{email}" th:classappend="${emailError} ? 'is-invalid' : ''">
-                <div class="text-danger small mt-1" th:if="${emailError}" th:text="${emailError}"></div>
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <label class="small opacity-75 mb-2 fw-bold">Tên đăng nhập</label>
+                    <input type="text" th:field="*{username}" class="form-control" placeholder="Tạo ID đăng nhập...">
+                    <div th:if="${usernameError}" class="text-warning small mt-1 fw-bold" th:text="${usernameError}"></div>
+                </div>
+                <div class="col-md-6">
+                    <label class="small opacity-75 mb-2 fw-bold">Mật khẩu</label>
+                    <input type="password" th:field="*{password}" class="form-control" placeholder="Nhập mật khẩu...">
+                </div>
             </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label fw-bold">Số điện thoại</label>
-                <input type="text" name="phone" class="form-control" th:value="*{phone}" th:classappend="${phoneError} ? 'is-invalid' : ''">
-                <div class="text-danger small mt-1" th:if="${phoneError}" th:text="${phoneError}"></div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-submit shadow"><i class="fa-solid fa-circle-check me-2"></i>XÁC NHẬN CẤP TÀI KHOẢN</button>
+                <a href="/admin/doctors" class="text-center text-white opacity-50 text-decoration-none small mt-2 hover-white">Quay lại danh sách</a>
             </div>
-        </div>
-
-        <hr>
-
-        <div class="mb-3">
-            <label class="form-label fw-bold">Tên đăng nhập</label>
-            <input type="text" name="username" class="form-control" th:value="*{username}" th:classappend="${usernameError} ? 'is-invalid' : ''">
-            <div class="text-danger small mt-1" th:if="${usernameError}" th:text="${usernameError}"></div>
-        </div>
-
-        <div class="mb-4">
-            <label class="form-label fw-bold">Mật khẩu khởi tạo</label>
-            <input type="password" name="password" class="form-control" th:classappend="${passwordError} ? 'is-invalid' : ''">
-            <div class="text-danger small mt-1" th:if="${passwordError}" th:text="${passwordError}"></div>
-        </div>
-
-        <button type="submit" class="btn btn-primary w-100">Cấp tài khoản</button>
-        <a th:href="@{/admin/doctors}" class="btn btn-outline-secondary w-100 mt-2">Hủy / Quay lại</a>
-    </form>
+        </form>
+    </div>
 </div>
 </body>
 </html>

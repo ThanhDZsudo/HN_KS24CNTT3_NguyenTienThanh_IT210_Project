@@ -2,6 +2,9 @@ package com.example.healthcare.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -28,4 +31,10 @@ public class Appointment {
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;
     private String status;
+
+    // THÊM ĐOẠN NÀY VÀO ĐỂ TỰ ĐỘNG KÉO BỆNH ÁN RA
+    @OneToOne(mappedBy = "appointment")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private MedicalRecord medicalRecord;
 }

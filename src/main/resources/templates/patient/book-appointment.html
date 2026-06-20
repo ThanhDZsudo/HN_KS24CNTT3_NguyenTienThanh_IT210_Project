@@ -1,65 +1,62 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Đặt Lịch Khám - Smart Healthcare</title>
+    <title>Đặt Lịch - Smart Healthcare</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #f0f2f5; }
-        .hero-mini { background: #1e3c72; color: white; padding: 40px 0; border-radius: 0 0 30px 30px; }
-        .booking-card { border: none; border-radius: 20px; margin-top: -30px; }
-        .form-select.is-invalid, .form-control.is-invalid { background-image: none !important; }
+        body { background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364); min-height: 100vh; color: white; display: flex; align-items: center; font-family: 'Segoe UI', sans-serif; }
+        .glass-card { background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; padding: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); width: 100%; max-width: 600px; margin: auto; }
+        .form-control, .form-select { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.15) !important; color: white !important; border-radius: 12px; padding: 12px; }
+        .form-control:focus, .form-select:focus { border-color: #00c6ff !important; box-shadow: 0 0 15px rgba(0, 198, 255, 0.2) !important; }
+        .btn-book { background: linear-gradient(45deg, #00c6ff, #0072ff); border: none; color: white; font-weight: bold; border-radius: 12px; padding: 15px; transition: 0.3s; }
+        .btn-book:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 114, 255, 0.4); }
+
+        /* Chữ trùng nền trắng của option select */
+        option { background-color: #162a35; color: white; }
     </style>
 </head>
 <body>
-<div class="hero-mini text-center position-relative">
-    <a th:href="@{/logout}" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-3">
-        <i class="fa-solid fa-power-off me-1"></i>Đăng xuất
-    </a>
-    <h2 class="fw-bold"><i class="fa-solid fa-calendar-check me-2"></i>ĐẶT LỊCH KHÁM BỆNH</h2>
-    <p class="opacity-75">Chăm sóc sức khỏe chủ động cùng đội ngũ bác sĩ chuyên khoa</p>
-</div>
-
-<div class="container mb-5">
-    <div class="card booking-card shadow-lg p-4 mx-auto" style="max-width: 700px;">
-        <div th:if="${error}" class="alert alert-danger shadow-sm mb-4" th:text="${error}"></div>
+<div class="container">
+    <div class="glass-card">
+        <h3 class="fw-bold text-center mb-4"><i class="fa-solid fa-calendar-plus text-info me-2"></i>Đặt Lịch Khám</h3>
 
         <form th:action="@{/patient/book-appointment}" method="post" th:object="${dto}" novalidate>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold"><i class="fa-solid fa-stethoscope me-1"></i>Chuyên Khoa</label>
-                    <select id="specSelect" name="specialtyId" class="form-select shadow-sm" th:classappend="${errorSpec} ? 'is-invalid' : ''" onchange="loadDoctors()">
-                        <option value="">-- Chọn chuyên khoa --</option>
-                        <option th:each="s : ${specialties}" th:value="${s.id}" th:text="${s.name}" th:selected="${dto.specialtyId == s.id}"></option>
-                    </select>
-                    <div class="text-danger small mt-1" th:if="${errorSpec}" th:text="${errorSpec}"></div>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold"><i class="fa-solid fa-user-doctor me-1"></i>Bác Sĩ</label>
-                    <select id="docSelect" name="doctorId" class="form-select shadow-sm" th:classappend="${errorDoc} ? 'is-invalid' : ''" disabled>
-                        <option value="">-- Vui lòng chọn chuyên khoa trước --</option>
-                    </select>
-                    <div class="text-danger small mt-1" th:if="${errorDoc}" th:text="${errorDoc}"></div>
-                </div>
+
+            <div class="mb-3">
+                <label class="small opacity-75 mb-2 fw-bold">Chọn Chuyên Khoa</label>
+                <select id="specSelect" name="specialtyId" class="form-select" onchange="loadDoctors()">
+                    <option value="">-- Chọn khoa điều trị --</option>
+                    <option th:each="s : ${specialties}" th:value="${s.id}" th:text="${s.name}"></option>
+                </select>
+                <div th:if="${errorSpec}" class="text-warning small mt-1 fw-bold" th:text="${errorSpec}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="small opacity-75 mb-2 fw-bold">Chọn Bác Sĩ</label>
+                <select id="docSelect" name="doctorId" class="form-select" disabled>
+                    <option value="">-- Vui lòng chọn khoa trước --</option>
+                </select>
+                <div th:if="${errorDoc}" class="text-warning small mt-1 fw-bold" th:text="${errorDoc}"></div>
             </div>
 
             <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold"><i class="fa-solid fa-calendar-day me-1"></i>Ngày Khám</label>
-                    <input type="date" name="date" class="form-control shadow-sm" th:value="${dto.date}" th:classappend="${errorDate} ? 'is-invalid' : ''">
-                    <div class="text-danger small mt-1" th:if="${errorDate}" th:text="${errorDate}"></div>
+                <div class="col-6 mb-4">
+                    <label class="small opacity-75 mb-2 fw-bold">Ngày Khám</label>
+                    <input type="date" name="date" class="form-control" th:value="${dto.date}">
+                    <div th:if="${errorDate}" class="text-warning small mt-1 fw-bold" th:text="${errorDate}"></div>
                 </div>
-                <div class="col-md-6 mb-4">
-                    <label class="form-label fw-bold"><i class="fa-solid fa-clock me-1"></i>Giờ Khám</label>
-                    <input type="time" name="time" class="form-control shadow-sm" th:value="${dto.time}" th:classappend="${errorTime} ? 'is-invalid' : ''">
-                    <div class="text-danger small mt-1" th:if="${errorTime}" th:text="${errorTime}"></div>
+                <div class="col-6 mb-4">
+                    <label class="small opacity-75 mb-2 fw-bold">Giờ Khám</label>
+                    <input type="time" name="time" class="form-control" th:value="${dto.time}">
+                    <div th:if="${errorTime}" class="text-warning small mt-1 fw-bold" th:text="${errorTime}"></div>
                 </div>
             </div>
 
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary btn-lg shadow-sm">Xác Nhận Đặt Lịch</button>
-                <a th:href="@{/patient/dashboard}" class="btn btn-light">Quay lại Trang chủ</a>
-            </div>
+            <div th:if="${error}" class="alert alert-danger bg-danger bg-opacity-25 border-0 text-white small fw-bold mb-3" th:text="${error}"></div>
+
+            <button type="submit" class="btn btn-book w-100 mb-3 shadow">XÁC NHẬN ĐẶT LỊCH HẸN</button>
+            <a href="/patient/dashboard" class="d-block text-center text-white opacity-50 text-decoration-none small hover-white">Hủy và quay lại</a>
         </form>
     </div>
 </div>
@@ -68,22 +65,13 @@
     function loadDoctors() {
         const specId = document.getElementById('specSelect').value;
         const docSelect = document.getElementById('docSelect');
-
-        if (!specId) {
-            docSelect.innerHTML = '<option value="">-- Vui lòng chọn chuyên khoa trước --</option>';
-            docSelect.disabled = true;
-            return;
-        }
-
+        if (!specId) { docSelect.disabled = true; return; }
         fetch(`/patient/api/doctors-by-specialty?specialtyId=${specId}`)
-            .then(res => res.json())
-            .then(data => {
-                docSelect.innerHTML = '<option value="">-- Chọn bác sĩ --</option>';
-                data.forEach(d => {
-                    docSelect.innerHTML += `<option value="${d.id}">${d.name}</option>`;
-                });
-                docSelect.disabled = false;
-            });
+            .then(res => res.json()).then(data => {
+            docSelect.innerHTML = '<option value="">-- Chọn bác sĩ phụ trách --</option>';
+            data.forEach(d => { docSelect.innerHTML += `<option value="${d.id}">${d.name}</option>`; });
+            docSelect.disabled = false;
+        });
     }
 </script>
 </body>

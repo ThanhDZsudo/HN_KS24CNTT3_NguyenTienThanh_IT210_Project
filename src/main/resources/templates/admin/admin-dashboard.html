@@ -1,99 +1,147 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Admin Dashboard - Smart Healthcare</title>
+    <title>Quản Trị Viên - Smart Healthcare</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
-        .hero-section {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            padding: 80px 0 100px 0;
-            border-radius: 0 0 50px 50px;
-            /* Thêm position relative để làm gốc tọa độ cho nút Đăng xuất */
-            position: relative;
+        body {
+            margin: 0; font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
+            background-size: 400% 400%; animation: gradientBG 15s ease infinite;
+            min-height: 100vh; overflow-x: hidden;
         }
-        .menu-card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            text-align: center;
-            padding: 30px 20px;
-            margin-top: -50px;
-            background: white;
-            height: 100%;
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        .menu-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
-        .icon-wrapper {
-            width: 80px; height: 80px; border-radius: 20px;
-            display: inline-flex; align-items: center; justify-content: center;
-            font-size: 35px; color: white; margin-bottom: 20px;
+
+        /* Nền mây mờ / bong bóng */
+        .circles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; margin: 0; padding: 0; }
+        .circles li { position: absolute; display: block; list-style: none; width: 20px; height: 20px; background: rgba(255, 255, 255, 0.1); animation: animateBubble 25s linear infinite; bottom: -150px; border-radius: 50%; }
+        .circles li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .circles li:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .circles li:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        .circles li:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+        .circles li:nth-child(5) { left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+
+        @keyframes animateBubble {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 50%; }
+            100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; border-radius: 20%; }
         }
+
+        /* Navbar Kính mờ */
+        .navbar-glass {
+            background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Thẻ Menu 3D */
+        .glass-card {
+            background: rgba(0, 0, 0, 0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 30px 20px;
+            color: #e9ecef; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer; position: relative; overflow: hidden; height: 100%;
+        }
+
+        .glass-card::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg); transition: all 0.6s ease; z-index: -1;
+        }
+
+        .glass-card:hover::before { left: 125%; }
+        .glass-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.4); border-color: #38ef7d;
+        }
+
+        .icon-box { font-size: 55px; margin-bottom: 20px; transition: transform 0.3s ease; text-shadow: 0 5px 15px rgba(0,0,0,0.4); }
+        .glass-card:hover .icon-box { transform: scale(1.15) rotate(5deg); }
+
+        .btn-glow {
+            background: linear-gradient(45deg, #11998e, #38ef7d); border: none; border-radius: 10px; color: white;
+            font-weight: bold; padding: 10px 25px; transition: 0.3s; box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
+        }
+        .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(17, 153, 142, 0.5); color: white;}
+
+        .welcome-text { animation: slideDown 1s ease forwards; opacity: 0; transform: translateY(-20px); }
+        @keyframes slideDown { to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-<div class="hero-section text-center text-white">
+<ul class="circles"><li></li><li></li><li></li><li></li><li></li></ul>
 
-    <a th:href="@{/logout}" class="btn btn-danger rounded-pill px-4 py-2 fw-bold shadow-sm position-absolute top-0 end-0 mt-4 me-4">
-        <i class="fa-solid fa-power-off me-2"></i>Đăng xuất
-    </a>
+<nav class="navbar navbar-expand-lg navbar-dark navbar-glass shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bolder fs-4" href="/"><i class="fa-solid fa-shield-halved text-success me-2"></i>Admin Portal</a>
+        <div class="d-flex align-items-center">
+            <span class="text-white me-4 fw-bold"><i class="fa-solid fa-user-shield me-1"></i> <span th:text="${session.loggedInUser.profile.fullName}"></span></span>
+            <a th:href="@{/profile}" class="btn btn-outline-light rounded-pill btn-sm px-3 me-2"><i class="fa-solid fa-user-gear me-1"></i>Hồ sơ</a>
+            <a th:href="@{/logout}" class="btn btn-danger rounded-pill btn-sm px-3 shadow-sm"><i class="fa-solid fa-power-off"></i></a>
+        </div>
+    </div>
+</nav>
 
-    <h1 class="fw-bolder mb-2" style="letter-spacing: 1px;">SMART HEALTHCARE ADMIN</h1>
-    <p class="fs-6 opacity-75 mb-3">Hệ thống quản lý trung tâm y tế thông minh</p>
-</div>
+<div class="container mt-5 mb-5 welcome-text">
+    <div class="text-center mb-5">
+        <h1 class="fw-bolder text-white text-shadow">Trung Tâm Điều Hành</h1>
+        <p class="text-white opacity-75 fs-5">Quản lý tổng thể bệnh viện, nhân sự và báo cáo doanh thu.</p>
+    </div>
 
-<div class="container mb-5 position-relative" style="z-index: 10; max-width: 1100px;">
-    <div class="row g-4 justify-content-center align-items-stretch">
-
-        <div class="col-md-4">
-            <div class="menu-card d-flex flex-column">
-                <div class="icon-wrapper mx-auto" style="background: #0d6efd;"><i class="fa-solid fa-user-doctor"></i></div>
-                <h4 class="fw-bold">Quản Lý Bác Sĩ</h4>
-                <p class="text-muted small">Xem danh sách, cấp tài khoản và phân quyền cho bác sĩ.</p>
-                <a th:href="@{/admin/doctors}" class="btn btn-primary w-100 rounded-pill fw-bold mt-auto py-2">Truy cập ngay</a>
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-4 col-sm-6">
+            <div class="glass-card" onclick="location.href='/admin/doctors'">
+                <div class="icon-box text-info"><i class="fa-solid fa-user-doctor"></i></div>
+                <h4 class="fw-bold text-white">Bác Sĩ</h4>
+                <p class="small opacity-75 mb-4">Cấp tài khoản, quản lý hồ sơ và khóa/mở quyền truy cập của Bác sĩ.</p>
+                <button class="btn btn-glow w-100 rounded-pill">Quản Lý</button>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="menu-card d-flex flex-column">
-                <div class="icon-wrapper mx-auto" style="background: #198754;"><i class="fa-solid fa-hospital-user"></i></div>
-                <h4 class="fw-bold">Quản Lý Bệnh Nhân</h4>
-                <p class="text-muted small">Theo dõi hồ sơ thông tin và lịch sử khám của bệnh nhân.</p>
-                <a th:href="@{/admin/patients}" class="btn btn-success w-100 rounded-pill fw-bold mt-auto py-2">Truy cập ngay</a>
+        <div class="col-md-4 col-sm-6">
+            <div class="glass-card" onclick="location.href='/admin/patients'">
+                <div class="icon-box text-warning"><i class="fa-solid fa-hospital-user"></i></div>
+                <h4 class="fw-bold text-white">Bệnh Nhân</h4>
+                <p class="small opacity-75 mb-4">Theo dõi danh sách bệnh nhân và lịch sử khám chữa bệnh.</p>
+                <button class="btn btn-glow w-100 rounded-pill">Quản Lý</button>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="menu-card d-flex flex-column">
-                <div class="icon-wrapper mx-auto" style="background: #ffc107;"><i class="fa-solid fa-pills"></i></div>
-                <h4 class="fw-bold">Danh Mục Thuốc</h4>
-                <p class="text-muted small">Quản lý kho thuốc, đơn vị tính và thông tin dược phẩm.</p>
-                <a th:href="@{/admin/medicines}" class="btn btn-warning w-100 rounded-pill fw-bold mt-auto py-2">Truy cập ngay</a>
+        <div class="col-md-4 col-sm-6">
+            <div class="glass-card" onclick="location.href='/admin/medicines'">
+                <div class="icon-box" style="color: #a8ff78;"><i class="fa-solid fa-capsules"></i></div>
+                <h4 class="fw-bold text-white">Kho Thuốc</h4>
+                <p class="small opacity-75 mb-4">Nhập/xuất kho, cập nhật số lượng và thông tin các loại thuốc.</p>
+                <button class="btn btn-glow w-100 rounded-pill">Quản Lý</button>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="menu-card d-flex flex-column">
-                <div class="icon-wrapper mx-auto" style="background: #0dcaf0;"><i class="fa-solid fa-prescription-bottle-medical"></i></div>
-                <h4 class="fw-bold">Quầy Phát Thuốc</h4>
-                <p class="text-muted small">Xác nhận đơn thuốc và tiến hành cấp phát cho bệnh nhân.</p>
-                <a th:href="@{/admin/prescriptions}" class="btn btn-info text-white w-100 rounded-pill fw-bold mt-auto py-2">Truy cập ngay</a>
+        <div class="col-md-4 col-sm-6">
+            <div class="glass-card" onclick="location.href='/admin/prescriptions'">
+                <div class="icon-box text-danger"><i class="fa-solid fa-prescription-bottle-medical"></i></div>
+                <h4 class="fw-bold text-white">Quầy Phát Thuốc</h4>
+                <p class="small opacity-75 mb-4">Duyệt đơn thuốc bác sĩ kê và tiến hành cấp phát cho bệnh nhân.</p>
+                <button class="btn btn-glow w-100 rounded-pill">Phát Thuốc</button>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="menu-card d-flex flex-column">
-                <div class="icon-wrapper mx-auto" style="background: #dc3545;"><i class="fa-solid fa-chart-pie"></i></div>
-                <h4 class="fw-bold">Thống Kê & Doanh Thu</h4>
-                <p class="text-muted small">Xem biểu đồ tăng trưởng doanh thu và top bác sĩ nổi bật.</p>
-                <a th:href="@{/admin/statistics}" class="btn btn-danger w-100 rounded-pill fw-bold mt-auto py-2">Truy cập ngay</a>
+        <div class="col-md-4 col-sm-6">
+            <div class="glass-card" onclick="location.href='/admin/statistics'">
+                <div class="icon-box text-primary"><i class="fa-solid fa-chart-pie"></i></div>
+                <h4 class="fw-bold text-white">Báo Cáo</h4>
+                <p class="small opacity-75 mb-4">Thống kê doanh thu, biểu đồ tăng trưởng và top bác sĩ nổi bật.</p>
+                <button class="btn btn-glow w-100 rounded-pill">Xem Biểu Đồ</button>
             </div>
         </div>
-
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

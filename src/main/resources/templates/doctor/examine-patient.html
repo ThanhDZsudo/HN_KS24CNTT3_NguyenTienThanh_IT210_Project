@@ -1,196 +1,197 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Phòng Khám - Smart Healthcare</title>
+    <title>Sổ Khám Bệnh - Smart Healthcare</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .form-control.is-invalid { background-image: none !important; }
+        body {
+            margin: 0; font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
+            background-size: 400% 400%; animation: gradientBG 15s ease infinite;
+            min-height: 100vh; color: #e9ecef; overflow-x: hidden;
+        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        /* Hiệu ứng bong bóng nền */
+        .circles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; margin: 0; padding: 0; }
+        .circles li { position: absolute; display: block; list-style: none; width: 20px; height: 20px; background: rgba(255, 255, 255, 0.1); animation: animateBubble 25s linear infinite; bottom: -150px; border-radius: 50%; }
+        .circles li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .circles li:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .circles li:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        @keyframes animateBubble { 0% { transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 50%; } 100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; border-radius: 20%; } }
+
+        .glass-container {
+            background: rgba(0, 0, 0, 0.25); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+            padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            animation: slideUp 0.8s ease forwards;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .table { color: white; margin-bottom: 0; }
+        .table thead th { background: rgba(0,0,0,0.4) !important; border-bottom: none; color: #00c6ff !important; text-transform: uppercase; padding: 18px 15px; letter-spacing: 1px;}
+        .table td { border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; background: transparent !important; color: white !important; padding: 15px; }
+        .table tbody tr { transition: 0.3s; }
+        .table tbody tr:hover { background: rgba(255,255,255,0.08) !important; transform: scale(1.01); }
+
+        .btn-glow-info { background: linear-gradient(45deg, #00c6ff, #0072ff); border: none; color: white; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,198,255,0.3); font-weight: bold;}
+        .btn-glow-info:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,198,255,0.5); color: white;}
+        .btn-glass { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); transition: 0.3s; font-weight: bold;}
+        .btn-glass:hover { background: rgba(255,255,255,0.2); color: white; }
+
+        /* Modal Glass */
+        .modal-content { background: rgba(20, 30, 48, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; color: white; }
+
+        /* Đã fix hộp hiển thị đơn thuốc có ngắt dòng tự động */
+        .pres-box { background: rgba(255,255,255,0.05); border-left: 4px solid #0dcaf0; padding: 15px; border-radius: 10px; color: #a5dff9; font-size: 0.9rem; white-space: pre-wrap; margin: 0; }
+        .diagnosis-box { background: rgba(255,71,87,0.1); border: 1px solid rgba(255,71,87,0.3); padding: 15px; border-radius: 10px; color: #ff4757; }
+
+        /* Box Trạng thái quầy thuốc Dark Glass */
+        .status-box-dark { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 15px; }
+        .badge-glow-success { background: rgba(56, 239, 125, 0.15); color: #38ef7d; border: 1px solid #38ef7d; box-shadow: 0 0 15px rgba(56, 239, 125, 0.3); }
     </style>
 </head>
-<body class="bg-light">
-<div class="container mt-5 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold text-primary"><i class="fa-solid fa-stethoscope me-2"></i>Tiến Hành Khám Bệnh</h3>
-        <a th:href="@{/doctor/pending-appointments}" class="btn btn-secondary"><i class="fa-solid fa-arrow-left me-1"></i>Hủy & Quay Lại</a>
+<body>
+
+<ul class="circles"><li></li><li></li><li></li><li></li></ul>
+
+<div class="container" style="max-width: 1200px;">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 px-2">
+        <h2 class="fw-bolder text-white text-shadow"><i class="fa-solid fa-book-medical text-info me-3"></i>Sổ Khám Bệnh Điện Tử</h2>
+        <div>
+            <a th:href="@{/patient/book-appointment}" class="btn btn-glow-info rounded-pill px-4 shadow-sm me-2">
+                <i class="fa-solid fa-calendar-plus me-2"></i>Đặt Lịch Mới
+            </a>
+            <a th:href="@{/patient/dashboard}" class="btn btn-glass rounded-pill px-4 shadow-sm">
+                <i class="fa-solid fa-arrow-left me-2"></i>Trang chủ
+            </a>
+        </div>
     </div>
 
-    <div class="card shadow-sm border-0 rounded-4">
-        <div class="card-header bg-primary text-white p-3 rounded-top-4">
-            <h5 class="mb-0">Bệnh Nhân: <span th:text="${appointment.patient.profile.fullName}"></span></h5>
-        </div>
-        <div class="card-body p-4">
-            <div class="row mb-4 text-muted border-bottom pb-3">
-                <div class="col-md-4"><strong><i class="fa-solid fa-calendar me-1"></i>Ngày sinh:</strong> <span th:text="${appointment.patient.profile.dateOfBirth}"></span></div>
-                <div class="col-md-4"><strong><i class="fa-solid fa-venus-mars me-1"></i>Giới tính:</strong> <span th:text="${appointment.patient.profile.gender}"></span></div>
-                <div class="col-md-4"><strong><i class="fa-solid fa-clock me-1"></i>Lịch hẹn:</strong> <span th:text="${appointment.appointmentDate + ' ' + appointment.appointmentTime}"></span></div>
+    <div th:if="${param.success}" class="alert alert-success bg-success bg-opacity-25 text-success border-success border-opacity-50 rounded-4 fw-bold">
+        <i class="fa-solid fa-calendar-check me-2"></i>Đặt lịch khám thành công!
+    </div>
+    <div th:if="${param.cancel_success}" class="alert alert-info bg-info bg-opacity-25 text-info border-info border-opacity-50 rounded-4 fw-bold">
+        <i class="fa-solid fa-ban me-2"></i>Đã hủy lịch hẹn thành công!
+    </div>
+    <div th:if="${param.cancel_error}" class="alert alert-danger bg-danger bg-opacity-25 text-danger border-danger border-opacity-50 rounded-4 fw-bold" th:text="${param.cancel_error}"></div>
+
+    <div class="glass-container table-responsive overflow-hidden">
+        <table class="table table-borderless align-middle text-center">
+            <thead>
+            <tr>
+                <th width="20%">Thời Gian Hẹn</th>
+                <th width="30%" class="text-start">Bác Sĩ Phụ Trách</th>
+                <th width="20%">Chuyên Khoa</th>
+                <th width="30%">Trạng Thái & Kết Quả</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="a : ${appointments}">
+                <td>
+                    <div class="fw-bold fs-5 text-white"><i class="fa-regular fa-calendar text-info me-2"></i><span th:text="${a.appointmentDate}"></span></div>
+                    <div class="text-warning fw-bold mt-1"><i class="fa-regular fa-clock me-1"></i><span th:text="${a.appointmentTime}"></span></div>
+                </td>
+                <td class="text-start">
+                    <div class="fw-bold text-white fs-5"><i class="fa-solid fa-user-doctor text-success me-2 opacity-75"></i><span th:text="${'BS. ' + a.doctor.profile.fullName}"></span></div>
+                    <div class="small opacity-50 mt-1"><i class="fa-solid fa-hospital me-1"></i>Smart Healthcare</div>
+                </td>
+                <td>
+                    <span class="badge bg-light bg-opacity-10 text-white border border-secondary px-3 py-2 rounded-pill shadow-sm" th:text="${a.specialty.name}"></span>
+                </td>
+
+                <td>
+                    <span th:if="${a.status == 'PENDING'}" class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold shadow-sm d-block mx-auto mb-2" style="width: fit-content;">Chờ khám</span>
+                    <span th:if="${a.status == 'COMPLETED'}" class="badge bg-success bg-opacity-25 text-success border border-success px-3 py-2 rounded-pill fw-bold shadow-sm d-block mx-auto mb-2" style="width: fit-content;">Đã khám</span>
+                    <span th:if="${a.status == 'CANCELLED'}" class="badge bg-danger bg-opacity-25 text-danger border border-danger px-3 py-2 rounded-pill fw-bold shadow-sm d-block mx-auto mb-2" style="width: fit-content;">Đã hủy</span>
+
+                    <div th:if="${a.status == 'PENDING'}">
+                        <a th:href="@{/patient/cancel-appointment/{id}(id=${a.id})}"
+                           class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold"
+                           onclick="return confirm('Bạn có chắc chắn muốn hủy lịch này? (Chỉ áp dụng trước 24h)')">
+                            <i class="fa-solid fa-ban me-1"></i>Hủy lịch
+                        </a>
+                    </div>
+
+                    <div th:if="${a.status == 'COMPLETED' and a.medicalRecord != null}">
+                        <button type="button" class="btn btn-sm btn-glow-info rounded-pill px-4 shadow-sm"
+                                data-bs-toggle="modal" th:data-bs-target="'#recordModal' + ${a.id}">
+                            <i class="fa-solid fa-notes-medical me-1"></i>Xem kết quả
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(appointments)}">
+                <td colspan="4" class="text-center py-5">
+                    <div class="text-info opacity-50 mb-3"><i class="fa-solid fa-folder-open" style="font-size: 60px;"></i></div>
+                    <h5 class="text-white opacity-75 fw-bold">Bạn chưa có hồ sơ khám bệnh nào</h5>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div th:each="a : ${appointments}" th:if="${a.status == 'COMPLETED' and a.medicalRecord != null}">
+    <div class="modal fade" th:id="'recordModal' + ${a.id}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-lg">
+
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-info"><i class="fa-solid fa-file-prescription me-2"></i>Hồ Sơ Khám Bệnh</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <div class="row mb-4 bg-white bg-opacity-10 p-3 rounded-3 mx-0 border border-secondary border-opacity-50">
+                        <div class="col-md-6">
+                            <p class="mb-1 opacity-75 small text-uppercase fw-bold">Bác sĩ chẩn đoán</p>
+                            <h6 class="fw-bold text-white mb-0" th:text="${'BS. ' + a.doctor.profile.fullName}"></h6>
+                        </div>
+                        <div class="col-md-6 border-start border-secondary border-opacity-50">
+                            <p class="mb-1 opacity-75 small text-uppercase fw-bold">Thời gian hoàn thành</p>
+                            <h6 class="fw-bold text-warning mb-0" th:text="${#temporals.format(a.medicalRecord.createdAt, 'HH:mm - dd/MM/yyyy')}"></h6>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-danger fw-bold"><i class="fa-solid fa-stethoscope me-2"></i>Kết luận bệnh:</h6>
+                        <div class="diagnosis-box fw-bold" th:text="${a.medicalRecord.diagnosis}"></div>
+                    </div>
+
+                    <div class="mb-2" th:if="${a.medicalRecord.prescription != null and !a.medicalRecord.prescription.isEmpty()}">
+                        <h6 class="text-info fw-bold"><i class="fa-solid fa-pills me-2"></i>Đơn thuốc được kê:</h6>
+                        <pre class="pres-box mb-3 fw-bold" th:text="${a.medicalRecord.prescription}"></pre>
+
+                        <div class="d-flex justify-content-between align-items-center status-box-dark mt-4">
+                            <span class="fw-bold text-white opacity-75"><i class="fa-solid fa-store me-2"></i>Trạng thái quầy thuốc:</span>
+
+                            <span th:if="${a.medicalRecord.dispenseStatus == 'PENDING'}" class="badge bg-warning text-dark px-4 py-2 rounded-pill fs-6 shadow-sm">
+                                <i class="fa-solid fa-hourglass-half me-2"></i>Chờ lấy thuốc
+                            </span>
+
+                            <span th:if="${a.medicalRecord.dispenseStatus == 'DISPENSED'}" class="badge badge-glow-success px-4 py-2 rounded-pill fs-6">
+                                <i class="fa-solid fa-check-double me-2"></i>Đã nhận thuốc
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mb-2" th:unless="${a.medicalRecord.prescription != null and !a.medicalRecord.prescription.isEmpty()}">
+                        <h6 class="text-info fw-bold"><i class="fa-solid fa-pills me-2"></i>Đơn thuốc được kê:</h6>
+                        <div class="text-white-50 small fst-italic p-3 rounded-3 bg-black bg-opacity-20 border border-secondary border-opacity-10">Ca khám này không kèm đơn thuốc chỉ định chỉ định chỉ định.</div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-light rounded-pill px-5 fw-bold" data-bs-dismiss="modal">Đóng</button>
+                </div>
             </div>
-
-            <form th:action="@{/doctor/examine/{id}(id=${appointment.id})}" method="post" th:object="${dto}" novalidate>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Triệu chứng lâm sàng</label>
-                        <textarea name="symptoms" class="form-control" th:classappend="${errorSymptoms} ? 'is-invalid' : ''" rows="3" placeholder="Nhập triệu chứng bệnh nhân đang gặp phải..."></textarea>
-                        <div class="text-danger small mt-1" th:if="${errorSymptoms}" th:text="${errorSymptoms}"></div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-danger">Chẩn đoán bệnh</label>
-                        <textarea name="diagnosis" class="form-control" th:classappend="${errorDiagnosis} ? 'is-invalid' : ''" rows="3" placeholder="Nhập kết luận bệnh..."></textarea>
-                        <div class="text-danger small mt-1" th:if="${errorDiagnosis}" th:text="${errorDiagnosis}"></div>
-                    </div>
-                </div>
-
-                <div class="mb-4 bg-light p-3 rounded-3 border">
-                    <label class="form-label fw-bold text-success"><i class="fa-solid fa-pills me-2"></i>Kê Đơn Thuốc</label>
-                    <div class="input-group mb-2">
-                        <select id="medicineSelect" class="form-select border-success">
-                            <option value="" data-stock="0">-- Chọn thuốc từ kho --</option>
-                            <option th:each="m : ${medicines}"
-                                    th:value="${m.name}"
-                                    th:data-stock="${m.quantity}"
-                                    th:text="${m.name + ' (' + m.unit + ') - Kho: ' + m.quantity}">
-                            </option>
-                        </select>
-
-                        <input type="number" id="quantityInput" class="form-control border-success text-center" placeholder="SL" style="max-width: 90px;">
-
-                        <input type="text" id="dosageInput" class="form-control border-success" placeholder="Liều dùng (VD: 2 viên/ngày sáng tối)">
-
-                        <button type="button" class="btn btn-success px-4 fw-bold" onclick="addMedicine()"><i class="fa-solid fa-plus"></i></button>
-                    </div>
-
-                    <div id="medicineError" class="text-danger small fw-bold mb-3 d-none"></div>
-
-                    <table class="table table-sm table-bordered bg-white align-middle">
-                        <thead class="table-light">
-                        <tr>
-                            <th>Tên thuốc</th>
-                            <th width="80" class="text-center">SL</th>
-                            <th>Liều dùng</th>
-                            <th width="100" class="text-center">Hành động</th>
-                        </tr>
-                        </thead>
-                        <tbody id="prescriptionBody">
-                        <tr><td colspan="4" class="text-center text-muted fst-italic">Chưa kê thuốc nào...</td></tr>
-                        </tbody>
-                    </table>
-
-                    <textarea name="prescription" id="finalPrescription" class="d-none"></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm"><i class="fa-solid fa-floppy-disk me-2"></i>Lưu Bệnh Án & Hoàn Thành</button>
-            </form>
         </div>
     </div>
 </div>
 
-<script>
-    let medicineList = [];
-
-    function addMedicine() {
-        const select = document.getElementById('medicineSelect');
-        const quantityInput = document.getElementById('quantityInput').value;
-        const dosage = document.getElementById('dosageInput').value;
-        const errorDiv = document.getElementById('medicineError');
-
-        // Đầu tiên luôn ẩn lỗi đi nếu người dùng đang bấm lại
-        errorDiv.classList.add('d-none');
-        errorDiv.innerText = "";
-
-        if (select.value === "" || quantityInput === "" || dosage.trim() === "") {
-            errorDiv.innerText = "⚠️ Vui lòng chọn thuốc, nhập số lượng và liều dùng!";
-            errorDiv.classList.remove('d-none');
-            return;
-        }
-
-        const name = select.value;
-        const requestedQuantity = parseInt(quantityInput);
-
-        if (requestedQuantity <= 0) {
-            errorDiv.innerText = "⚠️ Số lượng kê đơn phải lớn hơn 0!";
-            errorDiv.classList.remove('d-none');
-            return;
-        }
-
-        const selectedOption = select.options[select.selectedIndex];
-        const stockAvailable = parseInt(selectedOption.getAttribute('data-stock'));
-
-        let alreadyAdded = 0;
-        let existingIndex = -1;
-
-        for(let i = 0; i < medicineList.length; i++) {
-            if(medicineList[i].name === name) {
-                alreadyAdded += parseInt(medicineList[i].quantity);
-                existingIndex = i;
-            }
-        }
-
-        // KIỂM TRA TỒN KHO VÀ HIỂN THỊ TEXT ĐỎ
-        if ((requestedQuantity + alreadyAdded) > stockAvailable) {
-            errorDiv.innerText = `❌ Không đủ thuốc! Trong kho chỉ còn ${stockAvailable} đơn vị (trong đơn hiện tại bạn đã kê ${alreadyAdded} đơn vị loại này rồi).`;
-            errorDiv.classList.remove('d-none');
-            return;
-        }
-
-        if (existingIndex !== -1) {
-            medicineList[existingIndex].quantity = parseInt(medicineList[existingIndex].quantity) + requestedQuantity;
-            medicineList[existingIndex].dosage = dosage;
-        } else {
-            medicineList.push({ name: name, quantity: requestedQuantity, dosage: dosage });
-        }
-
-        document.getElementById('medicineSelect').value = '';
-        document.getElementById('quantityInput').value = '';
-        document.getElementById('dosageInput').value = '';
-
-        renderTable();
-    }
-
-    function removeMedicine(index) {
-        medicineList.splice(index, 1);
-        renderTable();
-    }
-
-    function editMedicine(index) {
-        const item = medicineList[index];
-        document.getElementById('medicineSelect').value = item.name;
-        document.getElementById('quantityInput').value = item.quantity;
-        document.getElementById('dosageInput').value = item.dosage;
-
-        // Ẩn lỗi đi khi bấm sửa
-        document.getElementById('medicineError').classList.add('d-none');
-
-        removeMedicine(index);
-    }
-
-    function renderTable() {
-        const body = document.getElementById('prescriptionBody');
-        body.innerHTML = '';
-        let textResult = '';
-
-        if (medicineList.length === 0) {
-            body.innerHTML = `<tr><td colspan="4" class="text-center text-muted fst-italic">Chưa kê thuốc nào...</td></tr>`;
-            document.getElementById('finalPrescription').value = "";
-            return;
-        }
-
-        medicineList.forEach((item, index) => {
-            body.innerHTML += `
-                <tr>
-                    <td class="fw-bold text-primary">${item.name}</td>
-                    <td class="text-center fw-bold text-danger">${item.quantity}</td>
-                    <td>${item.dosage}</td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-info text-white me-1" onclick="editMedicine(${index})"><i class="fa-solid fa-edit"></i></button>
-                        <button type="button" class="btn btn-sm btn-danger" onclick="removeMedicine(${index})"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>`;
-
-            textResult += `- ${item.name} (SL: ${item.quantity}) | HD: ${item.dosage}\n`;
-        });
-
-        document.getElementById('finalPrescription').value = textResult;
-    }
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

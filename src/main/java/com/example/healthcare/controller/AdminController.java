@@ -41,7 +41,7 @@ public class AdminController {
 
         List<RevenueDTO> revenueData = appointmentRepo.getMonthlyRevenue();
 
-        // FIX LỖI Ở ĐÂY: Thêm .filter(r -> r.getTotal() != null) để lọc bỏ các khoản doanh thu bị NULL
+        // Lọc bỏ các khoản doanh thu bị NULL
         Double totalRevenue = revenueData.stream()
                 .filter(r -> r.getTotal() != null)
                 .mapToDouble(RevenueDTO::getTotal)

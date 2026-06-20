@@ -1,54 +1,105 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Chi tiết Bệnh nhân</title>
+    <title>Chi Tiết Bệnh Nhân - Smart Healthcare</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0; font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
+            background-size: 400% 400%; animation: gradientBG 15s ease infinite;
+            min-height: 100vh; color: #e9ecef;
+        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        /* Khối Kính mờ tổng thể */
+        .glass-card {
+            background: rgba(0, 0, 0, 0.25); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+            padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Định dạng bảng lịch sử mượt mà (Xóa bỏ hoàn toàn mảng trắng) */
+        .table { color: white; margin-bottom: 0; }
+        .table thead th {
+            background: rgba(0, 0, 0, 0.4) !important; border-bottom: none;
+            color: #00c6ff !important; text-transform: uppercase; letter-spacing: 1px; padding: 15px;
+        }
+        .table td {
+            border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle;
+            background: transparent !important; color: white !important; padding: 15px;
+        }
+        .table tbody tr { transition: 0.3s; }
+        .table tbody tr:hover { background: rgba(255,255,255,0.05) !important; }
+
+        /* Các thành phần bổ trợ */
+        .btn-glass { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); transition: 0.3s; font-weight: bold;}
+        .btn-glass:hover { background: rgba(255,255,255,0.2); color: white; }
+
+        .badge-completed { background: rgba(56, 239, 125, 0.15); color: #38ef7d; border: 1px solid #38ef7d; }
+        .badge-pending { background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid #ffc107; }
+    </style>
 </head>
-<body class="bg-light">
-<div class="container mt-5">
-    <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
-        <div class="card-header bg-success text-white p-3">
-            <h4 class="mb-0">Thông tin chi tiết: <span th:text="${patient.profile.fullName}"></span></h4>
-        </div>
-        <div class="card-body p-4">
-            <div class="row">
-                <div class="col-md-4 border-end">
-                    <p><strong>Ngày sinh:</strong> <span th:text="${patient.profile.dateOfBirth}"></span></p>
-                    <p><strong>Giới tính:</strong> <span th:text="${patient.profile.gender}"></span></p>
-                </div>
-                <div class="col-md-4 border-end">
-                    <p><strong>Điện thoại:</strong> <span th:text="${patient.profile.phone}"></span></p>
-                    <p><strong>Địa chỉ:</strong> <span th:text="${patient.profile.address}"></span></p>
-                </div>
-                <div class="col-md-4">
-                    <p><strong>Tổng số lần khám:</strong> <span class="badge bg-primary" th:text="${appointments.size()}"></span></p>
-                </div>
+<body class="py-5">
+<div class="container" style="max-width: 950px;">
+
+    <div class="glass-card mb-5">
+        <h3 class="fw-bold text-info mb-4">
+            <i class="fa-solid fa-id-card-clip text-info me-2"></i>Hồ Sơ: <span th:text="${patient.profile.fullName}"></span>
+        </h3>
+        <div class="row g-4 fs-5">
+            <div class="col-md-6">
+                <div class="mb-2"><i class="fa-solid fa-cake-candles text-warning me-2" style="width: 25px;"></i><strong>Ngày sinh:</strong> <span th:text="${patient.profile.dateOfBirth}"></span></div>
+                <div><i class="fa-solid fa-venus-mars text-warning me-2" style="width: 25px;"></i><strong>Giới tính:</strong> <span th:text="${patient.profile.gender}"></span></div>
+            </div>
+            <div class="col-md-6 border-start border-secondary border-opacity-25">
+                <div class="mb-2"><i class="fa-solid fa-phone text-warning me-2" style="width: 25px;"></i><strong>Điện thoại:</strong> <span th:text="${patient.profile.phone}"></span></div>
+                <div><i class="fa-solid fa-map-location-dot text-warning me-2" style="width: 25px;"></i><strong>Địa chỉ:</strong> <span th:text="${patient.profile.address != null and !patient.profile.address.isEmpty() ? patient.profile.address : 'Chưa cập nhật'}"></span></div>
             </div>
         </div>
     </div>
 
-    <h4 class="fw-bold mb-3">Lịch sử khám & Hẹn lịch</h4>
-    <div class="table-responsive shadow-sm rounded-4 bg-white p-3">
-        <table class="table table-hover">
-            <thead class="table-dark">
+    <h4 class="fw-bold mb-3 text-white"><i class="fa-solid fa-clock-rotate-left text-info me-2"></i>Lịch Sử Khám Bệnh</h4>
+    <div class="glass-card table-responsive overflow-hidden p-0">
+        <table class="table table-borderless align-middle text-center">
+            <thead>
             <tr>
-                <th>Ngày/Giờ</th><th>Bác sĩ phụ trách</th><th>Chuyên khoa</th><th>Trạng thái</th>
+                <th class="text-start ps-4">Thời gian</th>
+                <th>Bác sĩ phụ trách</th>
+                <th>Chuyên khoa</th>
+                <th>Trạng thái</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="a : ${appointments}">
-                <td th:text="${a.appointmentDate + ' ' + a.appointmentTime}"></td>
-                <td th:text="${'BS. ' + a.doctor.profile.fullName}"></td>
-                <td th:text="${a.specialty.name}"></td>
+                <td class="text-start ps-4">
+                    <div class="fw-bold" th:text="${a.appointmentDate}"></div>
+                    <small class="opacity-50" th:text="${a.appointmentTime}"></small>
+                </td>
+                <td class="fw-bold text-info" th:text="${'BS. ' + a.doctor.profile.fullName}"></td>
                 <td>
-                    <span th:if="${a.status == 'PENDING'}" class="badge bg-warning text-dark">Chờ khám</span>
-                    <span th:if="${a.status == 'COMPLETED'}" class="badge bg-success">Đã khám xong</span>
+                    <span class="badge bg-light bg-opacity-10 text-white border border-secondary px-3 py-2 rounded-pill" th:text="${a.specialty.name}"></span>
+                </td>
+                <td>
+                    <span th:if="${a.status == 'COMPLETED'}" class="badge badge-completed px-3 py-2 rounded-pill fw-bold"><i class="fa-solid fa-square-check me-1"></i>Đã khám xong</span>
+                    <span th:if="${a.status == 'PENDING'}" class="badge badge-pending text-dark px-3 py-2 rounded-pill fw-bold"><i class="fa-solid fa-hourglass-start me-1"></i>Chờ khám</span>
+                    <span th:if="${a.status == 'CANCELLED'}" class="badge bg-danger bg-opacity-25 text-danger border border-danger px-3 py-2 rounded-pill fw-bold"><i class="fa-solid fa-ban me-1"></i>Đã hủy</span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(appointments)}">
+                <td colspan="4" class="text-center py-5 opacity-50">
+                    <i class="fa-solid fa-folder-open fs-1 mb-2"></i>
+                    <h5>Bệnh nhân này chưa thực hiện ca khám nào.</h5>
                 </td>
             </tr>
             </tbody>
         </table>
     </div>
-    <a th:href="@{/admin/patients}" class="btn btn-secondary mt-3">Quay lại danh sách</a>
+
+    <div class="mt-4">
+        <a th:href="@{/admin/patients}" class="btn btn-glass rounded-pill px-4 py-2 shadow-sm"><i class="fa-solid fa-arrow-left me-2"></i>Quay lại danh sách</a>
+    </div>
 </div>
 </body>
 </html>

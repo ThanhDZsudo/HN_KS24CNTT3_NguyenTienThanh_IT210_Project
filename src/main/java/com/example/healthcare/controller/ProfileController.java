@@ -19,22 +19,27 @@ public class ProfileController {
 
     private final UserRepository userRepository;
 
-    // 1. HIỂN THỊ TRANG PROFILE (Cái này cậu đang có và chạy OK)
+    // 1. HIỂN THỊ TRANG PROFILE - ĐÃ FIX ĐỒNG BỘ TÊN BIẾN VÀ FILE HTML
     @GetMapping("/profile")
     public String showProfile(HttpSession session, Model model) {
         User loggedInUser = (User) session.getAttribute("loggedInUser");
         if (loggedInUser == null) {
-            return "redirect:/login"; // Chưa đăng nhập thì đuổi về trang login
+            return "redirect:/login";
         }
 
-        // Lấy dữ liệu mới nhất từ Database
         User currentUser = userRepository.findById(loggedInUser.getId()).orElse(null);
-        model.addAttribute("user", currentUser);
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("profile", currentUser.getProfile());
+
+        // SỬA TẠI ĐÂY: Trả về "profile-view" thay vì "profile"
         return "profile-view";
     }
 
-    // 2. HỨNG DỮ LIỆU CẬP NHẬT (PHẦN CẬU ĐANG THIẾU GÂY RA LỖI)
-    @PostMapping("/profile")
+    // 2. HỨNG DỮ LIỆU CẬP NHẬT TỪ FORM SUBMIT
+    @PostMapping("/profile/update")
     public String updateProfile(
             @RequestParam("fullName") String fullName,
             @RequestParam("phone") String phone,
@@ -50,7 +55,6 @@ public class ProfileController {
             return "redirect:/login";
         }
 
-        // Lấy User từ DB ra để ghi đè thông tin mới
         User currentUser = userRepository.findById(loggedInUser.getId()).orElse(null);
 
         if (currentUser != null && currentUser.getProfile() != null) {
@@ -61,15 +65,18 @@ public class ProfileController {
             currentUser.getProfile().setGender(gender);
             currentUser.getProfile().setDateOfBirth(dateOfBirth);
 
-            // Lưu vào DB
+            // Lưu dữ liệu cập nhật xuống Database
             userRepository.save(currentUser);
 
-            // Cập nhật lại session cho đồng bộ
+            // Cập nhật lại thông tin user mới vào session cho đồng bộ hệ thống
             session.setAttribute("loggedInUser", currentUser);
+
+            // Bắn thông báo thành công xanh lá cây ra màn hình profile
+            redirectAttributes.addFlashAttribute("success", "🎉 Cập nhật hồ sơ cá nhân thành công!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "❌ Không tìm thấy thông tin hồ sơ!");
         }
 
-        // Bắn thông báo xanh lá cây ra màn hình
-        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật hồ sơ thành công!");
         return "redirect:/profile";
     }
 }

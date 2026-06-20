@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -29,7 +30,9 @@ public class PatientController {
     private final AppointmentRepository appointmentRepo;
 
     @GetMapping("/dashboard")
-    public String dashboard() { return "patient/patient-dashboard"; }
+    public String dashboard() {
+        return "patient/patient-dashboard";
+    }
 
     @GetMapping("/book-appointment")
     public String showBookForm(Model model) {
@@ -89,13 +92,22 @@ public class PatientController {
         return "patient/medical-history";
     }
 
+    /* ========================================================
+       HÀM HỦY LỊCH KHÁM ĐÃ ĐƯỢC FIX LỖI TRẮNG TRANG HOÀN TOÀN
+       ======================================================== */
     @GetMapping("/cancel-appointment/{id}")
-    public String cancelAppointment(@PathVariable Long id, HttpSession session) {
+    public String cancelAppointment(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
         User patient = (User) session.getAttribute("loggedInUser");
+        if (patient == null) {
+            return "redirect:/login";
+        }
+
         try {
             appointmentService.cancelAppointment(id, patient.getId());
+            // Điều hướng quay trở về trang sổ khám bệnh kèm param thông báo thành công
             return "redirect:/patient/medical-history?cancel_success";
         } catch (Exception e) {
+            // Nếu có lỗi (Ví dụ: quá hạn thời gian cho phép hủy), bắn ngược param lỗi về để hiển thị chữ đỏ
             return "redirect:/patient/medical-history?cancel_error=" + e.getMessage();
         }
     }

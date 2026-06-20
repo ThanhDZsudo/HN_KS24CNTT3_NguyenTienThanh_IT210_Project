@@ -110,7 +110,7 @@ public class AuthController {
             if (user.getRole() == Role.ADMIN) {
                 return "redirect:/admin/dashboard"; // Admin về Dashboard
             } else if (user.getRole() == Role.DOCTOR) {
-                return "redirect:/doctor/pending-appointments"; // Bác sĩ về Hàng chờ
+                return "redirect:/doctor/dashboard"; // Bác sĩ về Hàng chờ
             } else {
                 return "redirect:patient/dashboard"; // Bệnh nhân về Lịch sử khám
             }

@@ -3,27 +3,68 @@
 <head>
     <title>Đăng ký - Smart Healthcare</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .form-control.is-invalid {
-            background-image: none !important;
-            padding-right: 0.75rem !important;
+        body {
+            margin: 0; font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            padding: 40px 0;
         }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass-card {
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%; max-width: 500px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            color: #e9ecef;
+            animation: slideUp 0.8s ease forwards;
+        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .form-control { background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.15); color: white; border-radius: 10px; transition: 0.3s;}
+        .form-control:focus { background: rgba(0, 0, 0, 0.4); border-color: #38ef7d; color: white; box-shadow: 0 0 10px rgba(56, 239, 125, 0.2); }
+        .form-control::placeholder { color: rgba(255, 255, 255, 0.4); }
+        .form-control.is-invalid { background-image: none !important; border-color: #ff4757; }
+
+        .btn-glow {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            border: none; border-radius: 10px; color: white; font-weight: bold; padding: 12px; transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
+        }
+        .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(17, 153, 142, 0.5); color: white;}
     </style>
 </head>
-<body class="bg-light d-flex align-items-center" style="height: 100vh;">
-<div class="container card p-4 shadow-sm" style="max-width: 500px;">
-    <h3 class="text-center mb-4">Tạo Tài Khoản</h3>
+<body>
+
+<div class="glass-card">
+    <div class="text-center mb-4">
+        <h3 class="fw-bold text-white"><i class="fa-solid fa-user-plus text-success me-2"></i>Tạo Tài Khoản</h3>
+        <p class="opacity-75 small">Tham gia hệ thống chăm sóc sức khỏe</p>
+    </div>
 
     <form th:action="@{/register}" method="post" th:object="${dto}">
         <div class="mb-3">
-            <label class="form-label">Họ và tên</label>
-            <input type="text" name="fullName" class="form-control" th:value="*{fullName}" th:classappend="${nameError} ? 'is-invalid' : ''">
-            <div class="text-danger small mt-1" th:if="${nameError}" th:text="${nameError}"></div>
+            <label class="form-label fw-semibold opacity-75">Họ và tên</label>
+            <input type="text" name="fullName" class="form-control" placeholder="VD: Nguyễn Tiến Thành" th:value="*{fullName}" th:classappend="${nameError} ? 'is-invalid' : ''">
+            <div class="text-danger small mt-1 fw-bold" th:if="${nameError}" th:text="${nameError}" style="color: #ff4757 !important;"></div>
         </div>
 
         <div class="mb-3">
-            <label class="form-label d-block">Giới tính</label>
+            <label class="form-label d-block fw-semibold opacity-75">Giới tính</label>
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" name="gender" id="male" value="Nam" th:checked="*{gender == 'Nam'}">
                 <label class="form-check-label" for="male">Nam</label>
@@ -32,30 +73,34 @@
                 <input class="form-check-input" type="radio" name="gender" id="female" value="Nữ" th:checked="*{gender == 'Nữ'}">
                 <label class="form-check-label" for="female">Nữ</label>
             </div>
-            <div class="text-danger small mt-1" th:if="${genderError}" th:text="${genderError}"></div>
+            <div class="text-danger small mt-1 fw-bold" th:if="${genderError}" th:text="${genderError}" style="color: #ff4757 !important;"></div>
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Tên đăng nhập</label>
-            <input type="text" name="username" class="form-control" th:value="*{username}" th:classappend="${usernameError} ? 'is-invalid' : ''">
-            <div class="text-danger small mt-1" th:if="${usernameError}" th:text="${usernameError}"></div>
+            <label class="form-label fw-semibold opacity-75">Tên đăng nhập</label>
+            <input type="text" name="username" class="form-control" placeholder="Tối thiểu 3 ký tự" th:value="*{username}" th:classappend="${usernameError} ? 'is-invalid' : ''">
+            <div class="text-danger small mt-1 fw-bold" th:if="${usernameError}" th:text="${usernameError}" style="color: #ff4757 !important;"></div>
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Mật khẩu</label>
-            <input type="password" name="password" class="form-control" th:classappend="${passwordError} ? 'is-invalid' : ''">
-            <div class="text-danger small mt-1" th:if="${passwordError}" th:text="${passwordError}"></div>
+            <label class="form-label fw-semibold opacity-75">Mật khẩu</label>
+            <input type="password" name="password" class="form-control" placeholder="Tối thiểu 6 ký tự" th:classappend="${passwordError} ? 'is-invalid' : ''">
+            <div class="text-danger small mt-1 fw-bold" th:if="${passwordError}" th:text="${passwordError}" style="color: #ff4757 !important;"></div>
         </div>
 
         <div class="mb-4">
-            <label class="form-label">Xác nhận mật khẩu</label>
-            <input type="password" name="confirmPassword" class="form-control" th:classappend="${confirmError} ? 'is-invalid' : ''">
-            <div class="text-danger small mt-1" th:if="${confirmError}" th:text="${confirmError}"></div>
+            <label class="form-label fw-semibold opacity-75">Xác nhận mật khẩu</label>
+            <input type="password" name="confirmPassword" class="form-control" placeholder="Nhập lại mật khẩu" th:classappend="${confirmError} ? 'is-invalid' : ''">
+            <div class="text-danger small mt-1 fw-bold" th:if="${confirmError}" th:text="${confirmError}" style="color: #ff4757 !important;"></div>
         </div>
 
-        <button type="submit" class="btn btn-success w-100">Đăng ký tài khoản</button>
+        <button type="submit" class="btn btn-glow w-100 mb-3"><i class="fa-solid fa-check-circle me-2"></i>Đăng Ký Ngay</button>
+        <div class="text-center">
+            <span class="opacity-50 small">Đã có tài khoản?</span>
+            <a th:href="@{/login}" class="text-success text-decoration-none fw-bold ms-1">Đăng nhập</a>
+        </div>
     </form>
-    <p class="mt-3 text-center">Đã có tài khoản? <a th:href="@{/login}">Đăng nhập</a></p>
 </div>
+
 </body>
 </html>

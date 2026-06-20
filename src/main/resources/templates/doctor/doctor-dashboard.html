@@ -1,37 +1,91 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Trang Chủ Bác Sĩ</title>
+    <title>Bác Sĩ - Smart Healthcare</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #f4f7f6; }
-        .stat-card { border: none; border-radius: 15px; transition: 0.3s; cursor: pointer; }
-        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        body {
+            margin: 0; font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364);
+            background-size: 400% 400%; animation: gradientBG 15s ease infinite;
+            min-height: 100vh; overflow-x: hidden;
+        }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        .circles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; margin: 0; padding: 0; }
+        .circles li { position: absolute; display: block; list-style: none; width: 20px; height: 20px; background: rgba(255, 255, 255, 0.1); animation: animateBubble 25s linear infinite; bottom: -150px; border-radius: 50%; }
+        .circles li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .circles li:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .circles li:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        @keyframes animateBubble { 0% { transform: translateY(0) rotate(0deg); opacity: 1; border-radius: 50%; } 100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; border-radius: 20%; } }
+
+        .navbar-glass { background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+
+        .glass-card {
+            background: rgba(0, 0, 0, 0.25); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 40px 20px; color: #e9ecef; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.4s ease; cursor: pointer; position: relative; overflow: hidden; height: 100%;
+        }
+        .glass-card::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg); transition: all 0.6s ease; z-index: -1;
+        }
+        .glass-card:hover::before { left: 125%; }
+        .glass-card:hover { transform: translateY(-10px) scale(1.03); border-color: #38ef7d; background: rgba(0, 0, 0, 0.4); }
+        .icon-box { font-size: 60px; margin-bottom: 20px; transition: transform 0.3s ease; text-shadow: 0 5px 15px rgba(0,0,0,0.4); }
+        .glass-card:hover .icon-box { transform: scale(1.15) rotate(5deg); }
+
+        .welcome-text { animation: slideDown 1s ease forwards; opacity: 0; transform: translateY(-20px); }
+        @keyframes slideDown { to { opacity: 1; transform: translateY(0); } }
+
+        .btn-glow { background: linear-gradient(45deg, #11998e, #38ef7d); border: none; border-radius: 10px; color: white; font-weight: bold; padding: 12px 30px; transition: 0.3s; box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3); }
+        .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(17, 153, 142, 0.5); color: white;}
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
+
+<ul class="circles"><li></li><li></li><li></li></ul>
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-glass shadow-sm">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/"><i class="fa-solid fa-user-doctor me-2"></i>BS. <span th:text="${session.loggedInUser.profile.fullName}"></span></a>
-        <div class="d-flex">
-            <a th:href="@{/profile}" class="btn btn-outline-light btn-sm me-2"><i class="fa-solid fa-user me-1"></i>Hồ sơ</a>
-            <a th:href="@{/logout}" class="btn btn-danger btn-sm"><i class="fa-solid fa-power-off"></i></a>
+        <a class="navbar-brand fw-bolder fs-4" href="/"><i class="fa-solid fa-stethoscope text-info me-2"></i>Doctor Portal</a>
+        <div class="d-flex align-items-center">
+            <span class="text-white me-4 fw-bold"><i class="fa-solid fa-user-md me-1"></i> BS. <span th:text="${session.loggedInUser.profile.fullName}"></span></span>
+            <a th:href="@{/profile}" class="btn btn-outline-light rounded-pill btn-sm px-3 me-2"><i class="fa-solid fa-id-card me-1"></i>Hồ sơ</a>
+            <a th:href="@{/logout}" class="btn btn-danger rounded-pill btn-sm px-3 shadow-sm"><i class="fa-solid fa-power-off"></i></a>
         </div>
     </div>
 </nav>
 
-<div class="container mt-5">
-    <div class="row g-4 justify-content-center">
+<div class="container mt-5 mb-5 welcome-text">
+    <div class="text-center mb-5">
+        <h1 class="fw-bolder text-white">Khu Vực Làm Việc</h1>
+        <p class="text-white opacity-75 fs-5">Tiếp nhận bệnh nhân, ghi chú bệnh án và kê đơn thuốc.</p>
+    </div>
+
+    <div class="row g-5 justify-content-center">
         <div class="col-md-5">
-            <div class="card stat-card shadow-sm p-4 text-center h-100" onclick="location.href='/doctor/pending-appointments'">
-                <div class="display-4 text-primary mb-3"><i class="fa-solid fa-hospital-user"></i></div>
-                <h4 class="fw-bold">Hàng Chờ Khám</h4>
-                <p class="text-muted">Tiếp nhận bệnh nhân đang chờ tại phòng khám.</p>
-                <span class="btn btn-primary rounded-pill mt-auto">Vào Phòng Khám</span>
+            <div class="glass-card" onclick="location.href='/doctor/pending-appointments'">
+                <div class="icon-box text-warning"><i class="fa-solid fa-users-viewfinder"></i></div>
+                <h3 class="fw-bold text-white mb-3">Hàng Chờ Khám</h3>
+                <p class="opacity-75 mb-4">Xem danh sách bệnh nhân đang đợi khám trong ngày hôm nay.</p>
+                <button class="btn btn-glow w-100 rounded-pill">Tiếp Nhận Bệnh Nhân</button>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="glass-card" onclick="location.href='/doctor/history'">
+                <div class="icon-box text-success"><i class="fa-solid fa-laptop-medical"></i></div>
+                <h3 class="fw-bold text-white mb-3">Tra Cứu Bệnh Án</h3>
+                <p class="opacity-75 mb-4">Xem lại các bệnh án và đơn thuốc cũ đã kê cho bệnh nhân.</p>
+                <button class="btn btn-outline-light w-100 rounded-pill fw-bold">Tra Cứu</button>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
