@@ -1,8 +1,6 @@
 package com.example.healthcare.repository;
 
 import com.example.healthcare.model.entity.Medicine;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
